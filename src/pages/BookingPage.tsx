@@ -68,7 +68,9 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     'natural light',
     'good for calls',
     'dual screen setup',
-    'whiteboard access'
+    'whiteboard access',
+    'comfortable seating',
+    'desk lamp'
   ];
 
   const togglePref = (tag: string) => {

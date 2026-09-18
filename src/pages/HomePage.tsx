@@ -42,13 +42,12 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
               {/* Heading */}
               <h1 className="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance leading-tight">
-                Your workspace.<br />
-                <span className="text-primary">By the hour.</span><br />
-                With great coffee.
+                India’s Go-To <br />
+                <span className="text-primary">Workspace Platform</span>
               </h1>
 
               <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Celpin blends a premium co-working space with your favourite café. Pick a seat on the live floor map, book 1–6 hours, pre-order coffee to your desk, and check in with a QR code.
+                Book premium coworking spaces, hot desks &amp; meeting rooms in minutes. Work from anywhere.
               </p>
 
               {/* CTAs */}
@@ -354,43 +353,40 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Steps Section */}
       <section className="py-16 lg:py-24 bg-card/30 border-y border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold border-transparent bg-secondary text-secondary-foreground mb-3">
-              How It Works
-            </div>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">From booking to working in 4 steps</h2>
+            <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Steps</h2>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
             <div className="relative">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold font-display mb-4">01</div>
               <MapPin className="h-6 w-6 text-primary mb-3" />
-              <h3 className="font-semibold text-lg mb-2">Pick a Seat</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Browse the live floor map and choose your zone and specific seat.</p>
+              <h3 className="font-semibold text-lg mb-2">01 — Choose</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Your seat, your choice.</p>
             </div>
 
             <div className="relative">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold font-display mb-4">02</div>
               <Clock className="h-6 w-6 text-primary mb-3" />
-              <h3 className="font-semibold text-lg mb-2">Set Duration</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Select 1–6 hours. Add work preferences and café orders.</p>
+              <h3 className="font-semibold text-lg mb-2">02 — Book</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Book 1–6 hours.</p>
             </div>
 
             <div className="relative">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold font-display mb-4">03</div>
               <QrCode className="h-6 w-6 text-primary mb-3" />
-              <h3 className="font-semibold text-lg mb-2">Pay & Confirm</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Secure payment with cards and wallets. Get your QR code instantly.</p>
+              <h3 className="font-semibold text-lg mb-2">03 — Pay</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Pay. QR ready.</p>
             </div>
 
             <div className="relative">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold font-display mb-4">04</div>
               <Coffee className="h-6 w-6 text-primary mb-3" />
-              <h3 className="font-semibold text-lg mb-2">Scan & Work</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">Scan the QR at the entrance. Your seat is ready, coffee is on the way.</p>
+              <h3 className="font-semibold text-lg mb-2">04 — Work</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">Scan in &amp; get to work.</p>
             </div>
           </div>
         </div>

@@ -1,120 +1,156 @@
 import React from 'react';
-import { Coffee, Instagram, Twitter, Linkedin, Mail } from 'lucide-react';
+import { WHubLogo } from './WHubLogo';
+import { Mail, Instagram, MapPin, Heart, ArrowUpRight, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: string) => void;
+  onOpenApply: (role?: 'startup' | 'mentor' | 'student') => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenApply }) => {
   return (
-    <footer className="border-t border-border bg-card/50">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <button
-              onClick={() => onNavigate('home')}
-              className="flex items-center gap-2.5 mb-4 text-left cursor-pointer focus:outline-none"
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Coffee className="h-5 w-5" />
-              </div>
-              <span className="font-display text-xl font-bold">Celpin</span>
-            </button>
-            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-              Smart co-working café. Book your perfect workspace by the hour — with great coffee delivered to your seat.
+    <footer id="contact" className="bg-slate-950 text-slate-400 border-t border-slate-800 pt-16 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 pb-12 border-b border-slate-800/80">
+          
+          {/* Col 1: Brand & Identity */}
+          <div className="lg:col-span-4 space-y-4">
+            <WHubLogo size="lg" />
+            <p className="text-sm text-slate-400 leading-relaxed max-w-sm pt-2">
+              Warangal’s premier startup & innovation ecosystem. Catalyzing high-growth tech ventures, student founders, and mentor networks inspired by global incubator benchmarks.
             </p>
-          </div>
-
-          {/* Explore Links */}
-          <div>
-            <h4 className="text-sm font-semibold mb-3 text-foreground">Explore</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <button onClick={() => onNavigate('booking')} className="hover:text-foreground transition-colors">
-                  Book a Seat
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('floor-map')} className="hover:text-foreground transition-colors">
-                  Floor Map
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('cafe')} className="hover:text-foreground transition-colors">
-                  Café Menu
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('rewards')} className="hover:text-foreground transition-colors">
-                  Rewards
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="text-sm font-semibold mb-3 text-foreground">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <button onClick={() => onNavigate('proposal')} className="hover:text-foreground transition-colors">
-                  MVP Proposal
-                </button>
-              </li>
-              <li><span className="cursor-default">Pricing</span></li>
-              <li><span className="cursor-default">Careers</span></li>
-              <li><span className="cursor-default">Contact</span></li>
-            </ul>
-          </div>
-
-          {/* Connect */}
-          <div>
-            <h4 className="text-sm font-semibold mb-3 text-foreground">Connect</h4>
-            <div className="flex gap-3">
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Instagram"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-              >
-                <Instagram className="h-4 w-4" />
-              </a>
-              <a
-                href="https://twitter.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="Twitter"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-              >
-                <Twitter className="h-4 w-4" />
-              </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="LinkedIn"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-              >
-                <Linkedin className="h-4 w-4" />
-              </a>
-              <a
-                href="mailto:support@celpin.cafe"
-                aria-label="Email"
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
-              >
-                <Mail className="h-4 w-4" />
-              </a>
+            <div className="pt-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-orange-950/40 border border-orange-800/50 text-orange-400 text-xs font-semibold">
+                <Sparkles size={13} />
+                Ideas Today · Innovation Tomorrow
+              </div>
             </div>
           </div>
+
+          {/* Col 2: Official Contact & Socials */}
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+              Connect With Us
+            </h4>
+            <ul className="space-y-3 text-sm">
+              <li>
+                <a
+                  href="mailto:contact.w.hub@gmail.com"
+                  className="flex items-center gap-2 text-slate-300 hover:text-orange-400 transition"
+                >
+                  <Mail size={16} className="text-orange-500" />
+                  <span>contact.w.hub@gmail.com</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/whubwgl/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-slate-300 hover:text-pink-400 transition"
+                >
+                  <Instagram size={16} className="text-pink-500" />
+                  <span>@Whubwgl on Instagram</span>
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://www.instagram.com/reel/DcRG-5qzRU1/?utm_source=ig_web_copy_link&stkn=MzRlODBiNWFlZA=="
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-orange-400 hover:text-orange-300"
+                >
+                  <span>Featured Summit Reel</span>
+                  <ArrowUpRight size={13} />
+                </a>
+              </li>
+              <li className="flex items-start gap-2 text-xs text-slate-400 pt-1">
+                <MapPin size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                <span>Warangal Innovation Zone, Telangana (near NIT Warangal & Hanamkonda)</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 3: Programs & Portals */}
+          <div className="lg:col-span-2 space-y-4">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+              Programs
+            </h4>
+            <ul className="space-y-2.5 text-sm">
+              <li>
+                <button
+                  onClick={() => onOpenApply('startup')}
+                  className="hover:text-orange-400 transition text-left"
+                >
+                  W-Edge Founder Cohort
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenApply('student')}
+                  className="hover:text-orange-400 transition text-left"
+                >
+                  W-Campus Student Catalyst
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => onOpenApply('mentor')}
+                  className="hover:text-orange-400 transition text-left"
+                >
+                  W-Angel Investor Syndicate
+                </button>
+              </li>
+              <li>
+                <a href="#summit" className="hover:text-orange-400 transition">
+                  Warangal Open Mic
+                </a>
+              </li>
+              <li>
+                <a href="#summit" className="hover:text-orange-400 transition">
+                  Summit 2026 Archives
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Col 4: Apply & Newsletter */}
+          <div className="lg:col-span-3 space-y-4">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-white">
+              Join the Ecosystem
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Are you building an innovative startup in Warangal or an investor looking for early tier-2 dealflow?
+            </p>
+            <div className="pt-1">
+              <button
+                onClick={() => onOpenApply('startup')}
+                className="w-full py-2.5 px-4 rounded-xl font-display font-bold text-sm bg-gradient-to-r from-orange-600 to-amber-600 hover:brightness-110 text-white shadow-lg shadow-orange-600/20 transition flex items-center justify-center gap-2"
+              >
+                <ShieldCheck size={16} />
+                Submit Your Venture
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground">© 2026 Celpin. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Built with React, TypeScript, Tailwind CSS & Express</p>
+        {/* Bottom bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>
+            © {new Date().getFullYear()} W-Hub (Warangal Startups & Innovation Ecosystem). All rights reserved.
+          </p>
+          <div className="flex items-center gap-1">
+            <span>Built with</span>
+            <Heart size={13} className="text-rose-500 fill-rose-500" />
+            <span>for the ambitious founders of Warangal</span>
+          </div>
         </div>
+
       </div>
     </footer>
   );
 };
+
+export default Footer;
