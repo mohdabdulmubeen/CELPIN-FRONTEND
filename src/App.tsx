@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 // Celpin Components & Pages
 import { CelpinNavbar } from './components/CelpinNavbar';
 import { CelpinFooter } from './components/CelpinFooter';
-import { CelpinChatWidget } from './components/CelpinChatWidget';
 import { HomePage } from './pages/HomePage';
 import { BookingPage } from './pages/BookingPage';
 import { FloorMapPage } from './pages/FloorMapPage';
@@ -115,7 +114,6 @@ export function App() {
             {currentPage === 'rewards' && <RewardsPage onNavigate={handleNavigate} />}
             {currentPage === 'proposal' && <ProposalPage />}
           </main>
-          <CelpinChatWidget />
           <CelpinFooter onNavigate={handleNavigate} />
         </>
       )}

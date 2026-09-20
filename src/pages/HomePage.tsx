@@ -282,16 +282,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Everything you need to work, nothing you don't</h2>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
-                <Coffee className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Smart co-working café</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Book your perfect workspace by the hour — with great coffee delivered to your seat.
-              </p>
-            </div>
+          <div className="grid md:grid-cols-3 gap-5">
 
             <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
