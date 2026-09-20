@@ -18,20 +18,20 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
   return (
     <header className="fixed top-0 inset-x-0 z-50 transition-all duration-300 bg-background/80 backdrop-blur-md border-b border-border/60">
       <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-18 sm:h-20 items-center justify-between py-2">
           {/* Logo */}
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none"
+            className="flex items-center gap-3.5 py-1 group text-left cursor-pointer focus:outline-none"
           >
             <img
               src="/images/celpin-emblem.png"
               alt="Celpin Coworking Logo"
-              className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-border/50 group-hover:scale-105 transition-transform"
+              className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl object-cover shadow-sm ring-1 ring-border/50 group-hover:scale-105 transition-transform"
             />
-            <div className="flex flex-col">
-              <span className="font-display text-xl font-bold tracking-tight text-foreground leading-none">Celpin</span>
-              <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-1">Coworking</span>
+            <div className="flex flex-col justify-center py-0.5">
+              <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-none mb-1.5">Celpin</span>
+              <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Coworking</span>
             </div>
           </button>
 
