@@ -47,7 +47,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </h1>
 
               <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Book premium coworking spaces, hot desks &amp; meeting rooms in minutes. Work from anywhere.
+                Smart co-working café. Book your perfect workspace by the hour — with great coffee delivered to your seat.
               </p>
 
               {/* CTAs */}
@@ -58,13 +58,6 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 >
                   Book Your Seat
                   <ArrowRight className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => onNavigate('floor-map')}
-                  className="inline-flex items-center justify-center font-medium transition-all border border-input bg-card hover:bg-accent hover:text-accent-foreground rounded-xl gap-2 text-base h-12 px-6 shadow-xs hover:-translate-y-0.5"
-                >
-                  <MapPin className="h-4 w-4 text-primary" />
-                  View Live Map
                 </button>
               </div>
 
@@ -289,14 +282,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Everything you need to work, nothing you don't</h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
-                <MapPin className="h-5 w-5" />
+                <Coffee className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Real-Time Seat Map</h3>
+              <h3 className="font-semibold text-lg mb-2">Smart co-working café</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                See exactly which seats are free before you arrive. Interactive floor map updates live as people check in and out.
+                Book your perfect workspace by the hour — with great coffee delivered to your seat.
               </p>
             </div>
 
@@ -312,31 +305,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
 
             <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
-                <Coffee className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Café Pre-Orders</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Add coffee, snacks, or meals to your booking. Everything arrives at your seat — no queue, no interruption.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
                 <QrCode className="h-5 w-5" />
               </div>
               <h3 className="font-semibold text-lg mb-2">QR Digital Check-In</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Book online, get a QR code. Scan at the entrance, your seat is ready. Zero friction, zero wait.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-border bg-card p-6 shadow-xs hover:shadow-md transition-shadow">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary mb-4">
-                <Award className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Loyalty Rewards</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Earn credits on every booking. Redeem for free hours, free coffee, and member-only discounts.
               </p>
             </div>
 

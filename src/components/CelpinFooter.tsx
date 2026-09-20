@@ -1,5 +1,5 @@
 import React from 'react';
-import { Coffee, Instagram, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Instagram, Twitter, Linkedin, Mail } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (page: string) => void;
@@ -14,12 +14,17 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="md:col-span-1">
             <button
               onClick={() => onNavigate('home')}
-              className="flex items-center gap-2.5 mb-4 text-left cursor-pointer focus:outline-none"
+              className="flex items-center gap-3 mb-4 text-left cursor-pointer focus:outline-none group"
             >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Coffee className="h-5 w-5" />
+              <img
+                src="/images/celpin-emblem.png"
+                alt="Celpin Coworking Logo"
+                className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-border/50 group-hover:scale-105 transition-transform"
+              />
+              <div className="flex flex-col">
+                <span className="font-display text-xl font-bold tracking-tight text-foreground leading-none">Celpin</span>
+                <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-1">Coworking</span>
               </div>
-              <span className="font-display text-xl font-bold">Celpin</span>
             </button>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               Smart co-working café. Book your perfect workspace by the hour — with great coffee delivered to your seat.
@@ -35,21 +40,7 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
                   Book a Seat
                 </button>
               </li>
-              <li>
-                <button onClick={() => onNavigate('floor-map')} className="hover:text-foreground transition-colors">
-                  Floor Map
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('cafe')} className="hover:text-foreground transition-colors">
-                  Café Menu
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigate('rewards')} className="hover:text-foreground transition-colors">
-                  Rewards
-                </button>
-              </li>
+              <li><span className="cursor-default">Pricing</span></li>
             </ul>
           </div>
 
@@ -57,12 +48,7 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             <h4 className="text-sm font-semibold mb-3 text-foreground">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>
-                <button onClick={() => onNavigate('proposal')} className="hover:text-foreground transition-colors">
-                  MVP Proposal
-                </button>
-              </li>
-              <li><span className="cursor-default">Pricing</span></li>
+              <li><span className="cursor-default">About Us</span></li>
               <li><span className="cursor-default">Careers</span></li>
               <li><span className="cursor-default">Contact</span></li>
             </ul>
@@ -112,7 +98,7 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">© 2026 Celpin. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Built with React, TypeScript, Tailwind CSS & Express</p>
+          <p className="text-xs text-muted-foreground">Smart Co-Working Café</p>
         </div>
       </div>
     </footer>
