@@ -23,14 +23,17 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
           {/* Logo */}
           <button
             onClick={() => onNavigate('home')}
-            className="flex items-center gap-2.5 group text-left cursor-pointer focus:outline-none"
+            className="flex items-center gap-3 group text-left cursor-pointer focus:outline-none"
           >
             <img
-              src="/images/celpin-logo.jpeg"
-              alt="Celpin Logo"
-              className="h-9 w-9 rounded-lg object-contain shadow-sm bg-card border border-border group-hover:scale-105 transition-transform"
+              src="/images/celpin-emblem.png"
+              alt="Celpin Coworking Logo"
+              className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-border/50 group-hover:scale-105 transition-transform"
             />
-            <span className="font-display text-xl font-bold tracking-tight text-foreground">Celpin</span>
+            <div className="flex flex-col">
+              <span className="font-display text-xl font-bold tracking-tight text-foreground leading-none">Celpin</span>
+              <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mt-1">Coworking</span>
+            </div>
           </button>
 
           {/* Desktop Nav */}
