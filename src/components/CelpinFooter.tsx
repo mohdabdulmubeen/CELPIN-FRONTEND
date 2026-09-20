@@ -98,7 +98,6 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">© 2026 Celpin. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Smart Co-Working Café</p>
         </div>
       </div>
     </footer>
