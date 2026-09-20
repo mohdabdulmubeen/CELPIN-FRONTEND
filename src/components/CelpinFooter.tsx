@@ -27,7 +27,7 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
               </div>
             </button>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
-              Smart co-working café. Book your perfect workspace by the hour — with great coffee delivered to your seat.
+              Book premium coworking spaces, hot desks &amp; meeting rooms in minutes. Work from anywhere.
             </p>
           </div>
 

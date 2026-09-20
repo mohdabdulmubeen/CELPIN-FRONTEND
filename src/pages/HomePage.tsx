@@ -47,7 +47,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               </h1>
 
               <p className="mt-6 text-lg text-muted-foreground max-w-lg leading-relaxed">
-                Smart co-working café. Book your perfect workspace by the hour — with great coffee delivered to your seat.
+                Book premium coworking spaces, hot desks &amp; meeting rooms in minutes. Work from anywhere.
               </p>
 
               {/* CTAs */}
