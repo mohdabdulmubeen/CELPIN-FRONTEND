@@ -23,8 +23,6 @@ interface RegisterPageProps {
   onNavigate: (page: string, params?: any) => void;
 }
 
-export type SpaceChoice = 'hot-desk' | 'dedicated-desk' | 'meeting-room' | 'private-office';
-
 export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
   
@@ -34,7 +32,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [selectedSpace, setSelectedSpace] = useState<SpaceChoice>('hot-desk');
   const [companyName, setCompanyName] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(true);
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
@@ -43,42 +40,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
-  // Space intent options
-  const spaceOptions = [
-    {
-      id: 'hot-desk' as SpaceChoice,
-      title: 'Hot Desk & Café',
-      badge: 'Most Popular',
-      rate: 'From ₹60/hr',
-      desc: 'Flexible seat in quiet or collaboration zones with power & coffee.',
-      icon: <Laptop className="h-5 w-5" />
-    },
-    {
-      id: 'dedicated-desk' as SpaceChoice,
-      title: 'Dedicated Desk',
-      badge: 'Personal',
-      rate: 'Monthly Pass',
-      desc: 'Your permanent reserved desk with ergonomic chair & lockable storage.',
-      icon: <User className="h-5 w-5" />
-    },
-    {
-      id: 'meeting-room' as SpaceChoice,
-      title: 'Meeting Room',
-      badge: 'Teams',
-      rate: 'From ₹299/hr',
-      desc: 'Soundproof room with 4K display, conference audio & whiteboard.',
-      icon: <Users className="h-5 w-5" />
-    },
-    {
-      id: 'private-office' as SpaceChoice,
-      title: 'Private Office',
-      badge: 'Enterprises',
-      rate: 'Custom',
-      desc: 'Fully furnished private office suite for 2–20 team members.',
-      icon: <Building2 className="h-5 w-5" />
-    }
-  ];
 
   const calculatePasswordStrength = (pass: string) => {
     if (!pass) return 0;
@@ -270,12 +231,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
                       <span className="font-semibold text-foreground">{email || 'member@celpin.com'}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Space Preference:</span>
-                      <span className="font-semibold text-primary capitalize">
-                        {selectedSpace.replace('-', ' ')}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-muted-foreground">Status:</span>
                       <span className="font-semibold text-success flex items-center gap-1">
                         <CheckCircle2 className="h-3.5 w-3.5" /> Verified Active
@@ -418,76 +373,6 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
 
                     {authMode === 'register' && (
                       <>
-                        {/* PROMINENT "BOOK A SPACE" CHOICE SECTION */}
-                        <div className="space-y-2.5 pt-1">
-                          <div className="flex items-center justify-between">
-                            <label className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 text-primary" />
-                              What would you like to book?
-                            </label>
-                            <span className="text-[11px] font-medium text-muted-foreground">
-                              Select primary workspace
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            {spaceOptions.map((opt) => {
-                              const isSelected = selectedSpace === opt.id;
-                              return (
-                                <div
-                                  key={opt.id}
-                                  onClick={() => setSelectedSpace(opt.id)}
-                                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left relative flex flex-col justify-between ${
-                                    isSelected
-                                      ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-xs'
-                                      : 'border-border/80 hover:border-primary/40 bg-card hover:bg-muted/30'
-                                  }`}
-                                >
-                                  <div>
-                                    <div className="flex items-center justify-between mb-1.5">
-                                      <div className="flex items-center gap-2">
-                                        <div
-                                          className={`p-1.5 rounded-lg ${
-                                            isSelected
-                                              ? 'bg-primary text-primary-foreground'
-                                              : 'bg-muted text-muted-foreground'
-                                          }`}
-                                        >
-                                          {opt.icon}
-                                        </div>
-                                        <span className="font-bold text-sm text-foreground">
-                                          {opt.title}
-                                        </span>
-                                      </div>
-                                      <span
-                                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                                          isSelected
-                                            ? 'bg-primary/20 text-primary'
-                                            : 'bg-muted text-muted-foreground'
-                                        }`}
-                                      >
-                                        {opt.badge}
-                                      </span>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">
-                                      {opt.desc}
-                                    </p>
-                                  </div>
-
-                                  <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between text-[11px]">
-                                    <span className="font-semibold text-primary">{opt.rate}</span>
-                                    {isSelected && (
-                                      <span className="text-xs text-primary font-semibold flex items-center gap-1">
-                                        <Check className="h-3 w-3" /> Selected
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-
                         {/* Full Name */}
                         <div>
                           <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
@@ -674,7 +559,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
                           <span>Processing...</span>
                         ) : authMode === 'register' ? (
                           <>
-                            <span>Create Account &amp; Book Space</span>
+                            <span>Create Celpin Account</span>
                             <ArrowRight className="h-4 w-4" />
                           </>
                         ) : (
@@ -730,3 +615,4 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
     </div>
   );
 };
+
