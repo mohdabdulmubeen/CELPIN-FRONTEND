@@ -107,6 +107,7 @@ export function App() {
                 initialSeatId={pageParams.selectedSeatId}
                 initialZone={pageParams.selectedZone}
                 preselectedCart={pageParams.preselectedCart}
+                initialLocation={pageParams.initialLocation || pageParams.location}
               />
             )}
             {currentPage === 'floor-map' && <FloorMapPage onNavigate={handleNavigate} />}

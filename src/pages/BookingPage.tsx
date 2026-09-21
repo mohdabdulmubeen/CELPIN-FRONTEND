@@ -16,20 +16,31 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Seat, MenuItem, Booking, WorkspaceZone } from '../types';
+import { LocationSelectorBar, LocationSelection } from '../components/LocationSelectorBar';
 
 interface BookingPageProps {
   onNavigate: (page: string) => void;
   initialSeatId?: string;
   initialZone?: WorkspaceZone;
   preselectedCart?: Record<string, number>;
+  initialLocation?: LocationSelection;
 }
 
 export const BookingPage: React.FC<BookingPageProps> = ({
   onNavigate,
   initialSeatId,
   initialZone = 'quiet',
-  preselectedCart
+  preselectedCart,
+  initialLocation
 }) => {
+  const [location, setLocation] = useState<LocationSelection>(
+    initialLocation || {
+      country: 'India',
+      state: 'Telangana',
+      city: 'Warangal',
+      date: new Date().toISOString().split('T')[0]
+    }
+  );
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -218,6 +229,12 @@ export const BookingPage: React.FC<BookingPageProps> = ({
           {/* STEP 1: Select Workspace */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-200">
+              {/* Location & Booking Date Dropdown Controls */}
+              <LocationSelectorBar
+                value={location}
+                onChange={(sel) => setLocation(sel)}
+              />
+
               <div>
                 <h2 className="text-xl font-semibold mb-1">Select your workspace</h2>
                 <p className="text-sm text-muted-foreground">Choose a zone type, then pick an available seat.</p>
@@ -446,6 +463,14 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border text-left text-xs">
                       <div>
+                        <span className="text-muted-foreground">Hub / Location:</span>
+                        <p className="font-bold text-sm text-foreground">{location.city}, {location.state}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Booking Date:</span>
+                        <p className="font-bold text-sm text-foreground">{location.date}</p>
+                      </div>
+                      <div>
                         <span className="text-muted-foreground">Seat:</span>
                         <p className="font-bold text-sm text-foreground">{bookingResult.seatId} ({bookingResult.zone})</p>
                       </div>
@@ -466,16 +491,19 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
                   <div className="mt-8 flex justify-center gap-3">
                     <button
-                      onClick={() => onNavigate('floor-map')}
-                      className="inline-flex items-center justify-center text-sm font-medium border border-border bg-background hover:bg-accent h-10 px-5 rounded-xl"
+                      onClick={() => onNavigate('home')}
+                      className="inline-flex items-center justify-center text-sm font-medium border border-border bg-background hover:bg-accent h-10 px-5 rounded-xl cursor-pointer"
                     >
-                      View Live Floor Map
+                      Back to Home
                     </button>
                     <button
-                      onClick={() => onNavigate('rewards')}
-                      className="inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-5 rounded-xl shadow-xs"
+                      onClick={() => {
+                        setBookingResult(null);
+                        setStep(1);
+                      }}
+                      className="inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-5 rounded-xl shadow-xs cursor-pointer"
                     >
-                      Check Earned Credits
+                      Book Another Workspace
                     </button>
                   </div>
                 </div>
@@ -557,6 +585,34 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
             {selectedSeat ? (
               <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center pb-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Location</span>
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    {location.city}, {location.state}
+                    {step > 1 && (
+                      <button
+                        onClick={() => setStep(1)}
+                        className="text-[11px] text-primary hover:underline font-normal cursor-pointer"
+                      >
+                        (Edit)
+                      </button>
+                    )}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Date</span>
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    {location.date}
+                    {step > 1 && (
+                      <button
+                        onClick={() => setStep(1)}
+                        className="text-[11px] text-primary hover:underline font-normal cursor-pointer"
+                      >
+                        (Edit)
+                      </button>
+                    )}
+                  </span>
+                </div>
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
                   <span className="text-muted-foreground">Seat</span>
                   <span className="font-bold text-foreground">{selectedSeat.name} ({selectedSeat.zone})</span>
