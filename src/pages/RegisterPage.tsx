@@ -1,0 +1,732 @@
+import React, { useState } from 'react';
+import {
+  ArrowRight,
+  CheckCircle2,
+  Lock,
+  Mail,
+  User,
+  Phone,
+  Eye,
+  EyeOff,
+  Sparkles,
+  Coffee,
+  ShieldCheck,
+  Star,
+  Users,
+  Building2,
+  Calendar,
+  Check,
+  Laptop
+} from 'lucide-react';
+
+interface RegisterPageProps {
+  onNavigate: (page: string, params?: any) => void;
+}
+
+export type SpaceChoice = 'hot-desk' | 'dedicated-desk' | 'meeting-room' | 'private-office';
+
+export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
+  const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
+  
+  // Registration Form State
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedSpace, setSelectedSpace] = useState<SpaceChoice>('hot-desk');
+  const [companyName, setCompanyName] = useState('');
+  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [subscribeNewsletter, setSubscribeNewsletter] = useState(true);
+
+  // Status State
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  // Space intent options
+  const spaceOptions = [
+    {
+      id: 'hot-desk' as SpaceChoice,
+      title: 'Hot Desk & Café',
+      badge: 'Most Popular',
+      rate: 'From ₹60/hr',
+      desc: 'Flexible seat in quiet or collaboration zones with power & coffee.',
+      icon: <Laptop className="h-5 w-5" />
+    },
+    {
+      id: 'dedicated-desk' as SpaceChoice,
+      title: 'Dedicated Desk',
+      badge: 'Personal',
+      rate: 'Monthly Pass',
+      desc: 'Your permanent reserved desk with ergonomic chair & lockable storage.',
+      icon: <User className="h-5 w-5" />
+    },
+    {
+      id: 'meeting-room' as SpaceChoice,
+      title: 'Meeting Room',
+      badge: 'Teams',
+      rate: 'From ₹299/hr',
+      desc: 'Soundproof room with 4K display, conference audio & whiteboard.',
+      icon: <Users className="h-5 w-5" />
+    },
+    {
+      id: 'private-office' as SpaceChoice,
+      title: 'Private Office',
+      badge: 'Enterprises',
+      rate: 'Custom',
+      desc: 'Fully furnished private office suite for 2–20 team members.',
+      icon: <Building2 className="h-5 w-5" />
+    }
+  ];
+
+  const calculatePasswordStrength = (pass: string) => {
+    if (!pass) return 0;
+    let score = 0;
+    if (pass.length >= 8) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+    return score;
+  };
+
+  const passStrength = calculatePasswordStrength(password);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+
+    if (authMode === 'register') {
+      if (!fullName.trim()) {
+        setErrorMsg('Please enter your full name.');
+        return;
+      }
+      if (!email.trim() || !email.includes('@')) {
+        setErrorMsg('Please provide a valid work or personal email.');
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMsg('Password must be at least 6 characters long.');
+        return;
+      }
+      if (!agreeTerms) {
+        setErrorMsg('Please agree to the Terms of Service to continue.');
+        return;
+      }
+    } else {
+      if (!email.trim() || !password) {
+        setErrorMsg('Please fill in your email and password.');
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+    }, 700);
+  };
+
+  const handleSocialAuth = (provider: 'google' | 'linkedin') => {
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+    }, 600);
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      {/* Top Breadcrumb & Quick Switch */}
+      <div className="border-b border-border/60 bg-card/40 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <button
+              onClick={() => onNavigate('home')}
+              className="hover:text-primary transition-colors cursor-pointer"
+            >
+              Home
+            </button>
+            <span>/</span>
+            <span className="font-semibold text-foreground">
+              {authMode === 'register' ? 'Member Registration' : 'Account Sign In'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-muted-foreground hidden sm:inline">
+              Need a desk right now?
+            </span>
+            <button
+              onClick={() => onNavigate('booking')}
+              className="font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+            >
+              Book without account <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-14">
+        <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          
+          {/* LEFT COLUMN: Value Proposition & Brand Showcase (5 cols on lg) */}
+          <div className="lg:col-span-5 space-y-8">
+            {/* Header Lockup */}
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-4">
+                <Sparkles className="h-3.5 w-3.5" />
+                Premium Coworking Community
+              </div>
+              <h1 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
+                Work Where Ideas <br />
+                <span className="text-primary">Turn Into Momentum</span>
+              </h1>
+              <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Join Celpin to unlock seamless hourly desks, collaborative meeting spaces, and barista coffee delivered straight to your workstation.
+              </p>
+            </div>
+
+            {/* Visual Feature Highlights */}
+            <div className="space-y-3.5 pt-2">
+              <div className="flex items-start gap-3.5 p-3.5 rounded-xl border border-border/70 bg-card/60 shadow-xs hover:border-primary/40 transition-colors">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Zero Commitments, Pay As You Go</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Hourly rates with automatic ₹399 daily price protection cap.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 p-3.5 rounded-xl border border-border/70 bg-card/60 shadow-xs hover:border-primary/40 transition-colors">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+                  <Coffee className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">Smart Café &amp; Table Service</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Order espresso, cold brew, and snacks directly to your seat via QR.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3.5 p-3.5 rounded-xl border border-border/70 bg-card/60 shadow-xs hover:border-primary/40 transition-colors">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+                  <Lock className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-semibold">5-Second Digital QR Pass</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Instant booking confirmation and paperless check-in at every hub.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Member Review Card */}
+            <div className="rounded-2xl border border-border bg-card p-5 shadow-xs">
+              <div className="flex items-center gap-1 mb-2">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                ))}
+                <span className="text-xs font-semibold text-muted-foreground ml-2">4.8 / 5.0 rating</span>
+              </div>
+              <p className="text-xs sm:text-sm text-muted-foreground italic leading-relaxed">
+                “Celpin is my daily go-to. Signing up took 30 seconds, and having high-speed Wi-Fi with hot desks ready anytime is unbeatable.”
+              </p>
+              <div className="mt-3.5 flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xs">
+                  AK
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground">Arjun Kumar</p>
+                  <p className="text-[11px] text-muted-foreground">Product Engineer &amp; Celpin Member</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Redesigned Registration Card (7 cols on lg) */}
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl border border-border bg-card shadow-xl p-6 sm:p-8 lg:p-10 transition-all">
+              
+              {/* SUCCESS STATE */}
+              {isSuccess ? (
+                <div className="py-10 text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="inline-flex items-center justify-center h-18 w-18 rounded-full bg-success/15 text-success mx-auto ring-8 ring-success/10">
+                    <Check className="h-10 w-10 stroke-[2.5]" />
+                  </div>
+                  <div>
+                    <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
+                      {authMode === 'register' ? 'Welcome to Celpin!' : 'Welcome Back!'}
+                    </h2>
+                    <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
+                      {authMode === 'register'
+                        ? 'Your membership account is ready. Your ₹100 welcome coffee credit has been applied to your profile.'
+                        : 'You have signed in successfully. Ready to book your next workspace?'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-muted/40 border border-border/80 max-w-sm mx-auto text-left text-xs space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Account:</span>
+                      <span className="font-semibold text-foreground">{email || 'member@celpin.com'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Space Preference:</span>
+                      <span className="font-semibold text-primary capitalize">
+                        {selectedSpace.replace('-', ' ')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status:</span>
+                      <span className="font-semibold text-success flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> Verified Active
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <button
+                      onClick={() => onNavigate('booking')}
+                      className="inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-7 rounded-xl shadow-md hover:shadow-lg transition-all gap-2 cursor-pointer"
+                    >
+                      <span>Proceed to Book Workspace</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => onNavigate('home')}
+                      className="inline-flex items-center justify-center font-medium border border-border bg-background hover:bg-accent h-12 px-6 rounded-xl transition-all cursor-pointer text-sm"
+                    >
+                      Return to Home
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* MAIN FORM */
+                <div>
+                  {/* Auth Mode Tabs */}
+                  <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                    <div className="flex gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('register');
+                          setErrorMsg('');
+                        }}
+                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative ${
+                          authMode === 'register'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Create Account
+                        {authMode === 'register' && (
+                          <span className="absolute left-0 bottom-[-17px] w-full h-0.5 bg-primary rounded-full" />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAuthMode('login');
+                          setErrorMsg('');
+                        }}
+                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative ${
+                          authMode === 'login'
+                            ? 'text-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Sign In
+                        {authMode === 'login' && (
+                          <span className="absolute left-0 bottom-[-17px] w-full h-0.5 bg-primary rounded-full" />
+                        )}
+                      </button>
+                    </div>
+
+                    <span className="text-xs text-muted-foreground">
+                      {authMode === 'register' ? 'Free Registration' : 'Member Portal'}
+                    </span>
+                  </div>
+
+                  {/* PROMINENT SOCIAL SIGNUP BUTTONS (GOOGLE & LINKEDIN) */}
+                  <div className="space-y-3 mb-6">
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {/* Google Sign In Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSocialAuth('google')}
+                        className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 hover:border-primary/40 font-medium text-sm text-foreground transition-all shadow-xs cursor-pointer group"
+                      >
+                        <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.35 24 12 24z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.17 0 9.99 0 12s.45 3.83 1.25 5.42l4.03-3.15z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.35 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                          />
+                        </svg>
+                        <span>
+                          {authMode === 'register' ? 'Sign up with Google' : 'Sign in with Google'}
+                        </span>
+                      </button>
+
+                      {/* LinkedIn Sign In Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleSocialAuth('linkedin')}
+                        className="flex items-center justify-center gap-3 px-4 py-3 rounded-xl border border-border/80 bg-background hover:bg-muted/50 hover:border-primary/40 font-medium text-sm text-foreground transition-all shadow-xs cursor-pointer group"
+                      >
+                        <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="#0A66C2">
+                          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        </svg>
+                        <span>
+                          {authMode === 'register' ? 'Sign up with LinkedIn' : 'Sign in with LinkedIn'}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CLEAR VISUAL SEPARATOR */}
+                  <div className="relative my-7">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-border/80"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase tracking-wider font-semibold">
+                      <span className="bg-card px-3 text-muted-foreground">
+                        Or continue with email
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* FORM FIELDS */}
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Error Banner */}
+                    {errorMsg && (
+                      <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+                        {errorMsg}
+                      </div>
+                    )}
+
+                    {authMode === 'register' && (
+                      <>
+                        {/* PROMINENT "BOOK A SPACE" CHOICE SECTION */}
+                        <div className="space-y-2.5 pt-1">
+                          <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-primary" />
+                              What would you like to book?
+                            </label>
+                            <span className="text-[11px] font-medium text-muted-foreground">
+                              Select primary workspace
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            {spaceOptions.map((opt) => {
+                              const isSelected = selectedSpace === opt.id;
+                              return (
+                                <div
+                                  key={opt.id}
+                                  onClick={() => setSelectedSpace(opt.id)}
+                                  className={`p-3.5 rounded-2xl border transition-all cursor-pointer text-left relative flex flex-col justify-between ${
+                                    isSelected
+                                      ? 'border-primary ring-2 ring-primary/20 bg-primary/5 shadow-xs'
+                                      : 'border-border/80 hover:border-primary/40 bg-card hover:bg-muted/30'
+                                  }`}
+                                >
+                                  <div>
+                                    <div className="flex items-center justify-between mb-1.5">
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={`p-1.5 rounded-lg ${
+                                            isSelected
+                                              ? 'bg-primary text-primary-foreground'
+                                              : 'bg-muted text-muted-foreground'
+                                          }`}
+                                        >
+                                          {opt.icon}
+                                        </div>
+                                        <span className="font-bold text-sm text-foreground">
+                                          {opt.title}
+                                        </span>
+                                      </div>
+                                      <span
+                                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                          isSelected
+                                            ? 'bg-primary/20 text-primary'
+                                            : 'bg-muted text-muted-foreground'
+                                        }`}
+                                      >
+                                        {opt.badge}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                      {opt.desc}
+                                    </p>
+                                  </div>
+
+                                  <div className="mt-2.5 pt-2 border-t border-border/50 flex items-center justify-between text-[11px]">
+                                    <span className="font-semibold text-primary">{opt.rate}</span>
+                                    {isSelected && (
+                                      <span className="text-xs text-primary font-semibold flex items-center gap-1">
+                                        <Check className="h-3 w-3" /> Selected
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Full Name */}
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Full Name
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                              <User className="h-4 w-4" />
+                            </div>
+                            <input
+                              type="text"
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              placeholder="e.g. Rahul Verma"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {/* Email Field */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                        Work or Personal Email
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                          <Mail className="h-4 w-4" />
+                        </div>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@company.com"
+                          className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {authMode === 'register' && (
+                      /* Phone Number & Company Row */
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Phone Number
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                              <Phone className="h-4 w-4" />
+                            </div>
+                            <input
+                              type="tel"
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              placeholder="+91 98765 43210"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Company / Freelance (Optional)
+                          </label>
+                          <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                              <Building2 className="h-4 w-4" />
+                            </div>
+                            <input
+                              type="text"
+                              value={companyName}
+                              onChange={(e) => setCompanyName(e.target.value)}
+                              placeholder="e.g. Acme Tech Studio"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Password Field */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Password
+                        </label>
+                        {authMode === 'login' && (
+                          <a href="#forgot" className="text-xs text-primary hover:underline font-medium">
+                            Forgot password?
+                          </a>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                          <Lock className="h-4 w-4" />
+                        </div>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••••••"
+                          className="w-full bg-background border border-border rounded-xl pl-10 pr-11 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </button>
+                      </div>
+
+                      {/* Password strength meter for registration */}
+                      {authMode === 'register' && password && (
+                        <div className="mt-2 space-y-1">
+                          <div className="flex gap-1 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all ${
+                                passStrength <= 1
+                                  ? 'w-1/4 bg-destructive'
+                                  : passStrength === 2
+                                  ? 'w-2/4 bg-warning'
+                                  : passStrength === 3
+                                  ? 'w-3/4 bg-primary'
+                                  : 'w-full bg-success'
+                              }`}
+                            />
+                          </div>
+                          <p className="text-[11px] text-muted-foreground">
+                            {passStrength <= 1 && 'Weak password'}
+                            {passStrength === 2 && 'Fair password'}
+                            {passStrength === 3 && 'Good password'}
+                            {passStrength >= 4 && 'Strong password'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Terms & Conditions (Registration only) */}
+                    {authMode === 'register' && (
+                      <div className="space-y-2 pt-1">
+                        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={agreeTerms}
+                            onChange={(e) => setAgreeTerms(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary/20 border-border"
+                          />
+                          <span className="text-xs text-muted-foreground leading-relaxed">
+                            I agree to Celpin’s{' '}
+                            <span className="text-foreground underline decoration-dotted">
+                              Terms of Service
+                            </span>{' '}
+                            and{' '}
+                            <span className="text-foreground underline decoration-dotted">
+                              Privacy Policy
+                            </span>.
+                          </span>
+                        </label>
+
+                        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={subscribeNewsletter}
+                            onChange={(e) => setSubscribeNewsletter(e.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary/20 border-border"
+                          />
+                          <span className="text-xs text-muted-foreground leading-relaxed">
+                            Send me exclusive member perks, discounts &amp; free coffee voucher updates.
+                          </span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* Primary CTA */}
+                    <div className="pt-3">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full h-12 inline-flex items-center justify-center font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-6 gap-2 text-sm sm:text-base shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        {isSubmitting ? (
+                          <span>Processing...</span>
+                        ) : authMode === 'register' ? (
+                          <>
+                            <span>Create Account &amp; Book Space</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            <span>Sign In to Member Portal</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Footer Toggle text */}
+                    <div className="text-center pt-2">
+                      <p className="text-xs text-muted-foreground">
+                        {authMode === 'register' ? (
+                          <>
+                            Already have a Celpin account?{' '}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAuthMode('login');
+                                setErrorMsg('');
+                              }}
+                              className="font-bold text-primary hover:underline cursor-pointer"
+                            >
+                              Sign In
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            Don’t have an account yet?{' '}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAuthMode('register');
+                                setErrorMsg('');
+                              }}
+                              className="font-bold text-primary hover:underline cursor-pointer"
+                            >
+                              Register here
+                            </button>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </form>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

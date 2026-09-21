@@ -36,8 +36,13 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="text-sm font-semibold mb-3 text-foreground">Explore</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <button onClick={() => onNavigate('booking')} className="hover:text-foreground transition-colors">
+                <button onClick={() => onNavigate('booking')} className="hover:text-foreground transition-colors cursor-pointer">
                   Book a Seat
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigate('register')} className="hover:text-foreground transition-colors cursor-pointer">
+                  Member Registration
                 </button>
               </li>
               <li><span className="cursor-default">Pricing</span></li>

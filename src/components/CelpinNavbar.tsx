@@ -12,7 +12,8 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
 
   const navLinks = [
     { id: 'home', label: 'Home' },
-    { id: 'booking', label: 'Book a Seat' }
+    { id: 'booking', label: 'Book a Seat' },
+    { id: 'register', label: 'Register' }
   ];
 
   return (

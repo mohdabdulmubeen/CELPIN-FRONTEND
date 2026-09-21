@@ -9,6 +9,7 @@ import { FloorMapPage } from './pages/FloorMapPage';
 import { CafePage } from './pages/CafePage';
 import { RewardsPage } from './pages/RewardsPage';
 import { ProposalPage } from './pages/ProposalPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 // W-Hub Components & Pages
 import { WHubNavbar } from './components/WHubNavbar';
@@ -114,6 +115,7 @@ export function App() {
             {currentPage === 'cafe' && <CafePage onNavigate={handleNavigate} />}
             {currentPage === 'rewards' && <RewardsPage onNavigate={handleNavigate} />}
             {currentPage === 'proposal' && <ProposalPage />}
+            {currentPage === 'register' && <RegisterPage onNavigate={handleNavigate} />}
           </main>
           <CelpinFooter onNavigate={handleNavigate} />
         </>
