@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 interface HomePageProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: any) => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
@@ -53,8 +53,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
               {/* CTAs */}
               <div className="mt-8 flex flex-wrap gap-3">
                 <button
-                  onClick={() => onNavigate('booking')}
-                  className="inline-flex items-center justify-center font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl gap-2 text-base h-12 px-6 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                  onClick={() => onNavigate('register', { redirectTo: 'booking' })}
+                  className="inline-flex items-center justify-center font-medium transition-all bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl gap-2 text-base h-12 px-6 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
                 >
                   Book Your Seat
                   <ArrowRight className="h-4 w-4" />
@@ -389,8 +389,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                 </ul>
                 <div className="mt-8">
                   <button
-                    onClick={() => onNavigate('booking')}
-                    className="inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl px-8 gap-2 shadow-sm"
+                    onClick={() => onNavigate('register', { redirectTo: 'booking' })}
+                    className="inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl px-8 gap-2 shadow-sm cursor-pointer"
                   >
                     Start Booking <ArrowRight className="h-4 w-4" />
                   </button>

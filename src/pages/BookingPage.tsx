@@ -24,6 +24,8 @@ interface BookingPageProps {
   initialZone?: WorkspaceZone;
   preselectedCart?: Record<string, number>;
   initialLocation?: LocationSelection;
+  initialCustomerName?: string;
+  initialCustomerEmail?: string;
 }
 
 export const BookingPage: React.FC<BookingPageProps> = ({
@@ -31,7 +33,9 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   initialSeatId,
   initialZone = 'quiet',
   preselectedCart,
-  initialLocation
+  initialLocation,
+  initialCustomerName,
+  initialCustomerEmail
 }) => {
   const [location, setLocation] = useState<LocationSelection>(
     initialLocation || {
@@ -54,10 +58,35 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   
   // Payment info
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi'>('upi');
-  const [customerName, setCustomerName] = useState('Rahul Verma');
-  const [customerEmail, setCustomerEmail] = useState('rahul.verma@example.com');
+  const [customerName, setCustomerName] = useState(() => {
+    if (initialCustomerName) return initialCustomerName;
+    try {
+      const stored = localStorage.getItem('celpin_user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u.name) return u.name;
+      }
+    } catch {}
+    return 'Rahul Verma';
+  });
+  const [customerEmail, setCustomerEmail] = useState(() => {
+    if (initialCustomerEmail) return initialCustomerEmail;
+    try {
+      const stored = localStorage.getItem('celpin_user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u.email) return u.email;
+      }
+    } catch {}
+    return 'rahul.verma@example.com';
+  });
   const [bookingResult, setBookingResult] = useState<Booking | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (initialCustomerName) setCustomerName(initialCustomerName);
+    if (initialCustomerEmail) setCustomerEmail(initialCustomerEmail);
+  }, [initialCustomerName, initialCustomerEmail]);
 
   useEffect(() => {
     api.getSeats().then(data => {

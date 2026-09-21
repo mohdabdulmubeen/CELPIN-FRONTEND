@@ -2,7 +2,7 @@ import React from 'react';
 import { Instagram, Twitter, Linkedin, Mail } from 'lucide-react';
 
 interface FooterProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: any) => void;
 }
 
 export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
@@ -36,7 +36,7 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
             <h4 className="text-sm font-semibold mb-3 text-foreground">Explore</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <button onClick={() => onNavigate('booking')} className="hover:text-foreground transition-colors cursor-pointer">
+                <button onClick={() => onNavigate('register', { redirectTo: 'booking' })} className="hover:text-foreground transition-colors cursor-pointer">
                   Book a Seat
                 </button>
               </li>

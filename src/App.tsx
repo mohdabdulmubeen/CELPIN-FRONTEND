@@ -109,13 +109,21 @@ export function App() {
                 initialZone={pageParams.selectedZone}
                 preselectedCart={pageParams.preselectedCart}
                 initialLocation={pageParams.initialLocation || pageParams.location}
+                initialCustomerName={pageParams.customerName}
+                initialCustomerEmail={pageParams.customerEmail}
               />
             )}
             {currentPage === 'floor-map' && <FloorMapPage onNavigate={handleNavigate} />}
             {currentPage === 'cafe' && <CafePage onNavigate={handleNavigate} />}
             {currentPage === 'rewards' && <RewardsPage onNavigate={handleNavigate} />}
             {currentPage === 'proposal' && <ProposalPage />}
-            {currentPage === 'register' && <RegisterPage onNavigate={handleNavigate} />}
+            {currentPage === 'register' && (
+              <RegisterPage
+                onNavigate={handleNavigate}
+                redirectTo={pageParams.redirectTo || 'booking'}
+                initialParams={pageParams}
+              />
+            )}
           </main>
           <CelpinFooter onNavigate={handleNavigate} />
         </>

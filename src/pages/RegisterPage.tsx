@@ -21,9 +21,15 @@ import {
 
 interface RegisterPageProps {
   onNavigate: (page: string, params?: any) => void;
+  redirectTo?: string;
+  initialParams?: any;
 }
 
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
+export const RegisterPage: React.FC<RegisterPageProps> = ({
+  onNavigate,
+  redirectTo = 'booking',
+  initialParams
+}) => {
   const [authMode, setAuthMode] = useState<'register' | 'login'>('register');
   
   // Registration Form State
@@ -52,6 +58,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   };
 
   const passStrength = calculatePasswordStrength(password);
+
+  const proceedToBooking = (userName?: string, userEmail?: string) => {
+    onNavigate(redirectTo || 'booking', {
+      ...initialParams,
+      customerName: userName || fullName || 'Member',
+      customerEmail: userEmail || email || 'member@celpin.com'
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,14 +99,38 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
-    }, 700);
+      try {
+        localStorage.setItem(
+          'celpin_user',
+          JSON.stringify({ name: fullName || 'Member', email, phone })
+        );
+      } catch {}
+      // Auto-forward to booking after brief confirmation
+      setTimeout(() => {
+        proceedToBooking();
+      }, 1400);
+    }, 600);
   };
 
   const handleSocialAuth = (provider: 'google' | 'linkedin') => {
     setIsSubmitting(true);
+    const mockName = provider === 'google' ? 'Google User' : 'LinkedIn Member';
+    const mockEmail = provider === 'google' ? 'user@gmail.com' : 'user@linkedin.com';
+    setFullName(mockName);
+    setEmail(mockEmail);
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSuccess(true);
+      try {
+        localStorage.setItem(
+          'celpin_user',
+          JSON.stringify({ name: mockName, email: mockEmail })
+        );
+      } catch {}
+      setTimeout(() => {
+        proceedToBooking(mockName, mockEmail);
+      }, 1400);
     }, 600);
   };
 
@@ -119,7 +157,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
               Need a desk right now?
             </span>
             <button
-              onClick={() => onNavigate('booking')}
+              onClick={() => proceedToBooking()}
               className="font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
             >
               Book without account <ArrowRight className="h-3.5 w-3.5" />
@@ -240,7 +278,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
 
                   <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
                     <button
-                      onClick={() => onNavigate('booking')}
+                      onClick={() => proceedToBooking()}
                       className="inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-7 rounded-xl shadow-md hover:shadow-lg transition-all gap-2 cursor-pointer"
                     >
                       <span>Proceed to Book Workspace</span>

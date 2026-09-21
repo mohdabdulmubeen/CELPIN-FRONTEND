@@ -4,7 +4,7 @@ import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
   currentPage: string;
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, params?: any) => void;
 }
 
 export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
@@ -43,8 +43,14 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
               return (
                 <button
                   key={link.id}
-                  onClick={() => onNavigate(link.id)}
-                  className={`relative px-3.5 py-2 text-sm font-medium rounded-md transition-colors ${
+                  onClick={() => {
+                    if (link.id === 'booking') {
+                      onNavigate('register', { redirectTo: 'booking' });
+                    } else {
+                      onNavigate(link.id);
+                    }
+                  }}
+                  className={`relative px-3.5 py-2 text-sm font-medium rounded-md transition-colors cursor-pointer ${
                     isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
@@ -62,8 +68,8 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
             <ThemeToggle />
 
             <button
-              onClick={() => onNavigate('booking')}
-              className="hidden sm:inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 gap-1.5 shadow-sm"
+              onClick={() => onNavigate('register', { redirectTo: 'booking' })}
+              className="hidden sm:inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-9 rounded-md px-3 gap-1.5 shadow-sm cursor-pointer"
             >
               Book Now
             </button>
@@ -71,7 +77,7 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10 md:hidden border border-border/50 text-muted-foreground"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10 md:hidden border border-border/50 text-muted-foreground cursor-pointer"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -86,10 +92,14 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
               <button
                 key={link.id}
                 onClick={() => {
-                  onNavigate(link.id);
+                  if (link.id === 'booking') {
+                    onNavigate('register', { redirectTo: 'booking' });
+                  } else {
+                    onNavigate(link.id);
+                  }
                   setMobileMenuOpen(false);
                 }}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium transition-colors cursor-pointer ${
                   currentPage === link.id
                     ? 'bg-primary/10 text-primary font-semibold'
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -101,10 +111,10 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
             <div className="pt-2">
               <button
                 onClick={() => {
-                  onNavigate('booking');
+                  onNavigate('register', { redirectTo: 'booking' });
                   setMobileMenuOpen(false);
                 }}
-                className="w-full inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground h-10 rounded-md"
+                className="w-full inline-flex items-center justify-center text-sm font-medium bg-primary text-primary-foreground h-10 rounded-md cursor-pointer"
               >
                 Book Now
               </button>
