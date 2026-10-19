@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -6,13 +7,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: true,
     cors: true,
+    allowedHosts: ['tipped-goofiness-ambulance.ngrok-free.dev'],
     proxy: {
       '/api': {
         target: 'http://localhost:5001',
-        changeOrigin: true
-      }
-    }
-  }
+        changeOrigin: true,
+      },
+    },
+  },
 });

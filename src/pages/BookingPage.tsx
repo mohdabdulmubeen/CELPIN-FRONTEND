@@ -10,13 +10,13 @@ import {
   ShieldCheck,
   CreditCard,
   Wallet,
-  CheckCircle2,
-  Plus,
-  Minus
+  CheckCircle2
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Seat, MenuItem, Booking, WorkspaceZone } from '../types';
 import { LocationSelectorBar, LocationSelection } from '../components/LocationSelectorBar';
+import { useI18n } from '../i18n/I18nContext';
+export type { LocationSelection };
 
 interface BookingPageProps {
   onNavigate: (page: string) => void;
@@ -37,15 +37,18 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   initialCustomerName,
   initialCustomerEmail
 }) => {
+  const { t } = useI18n();
   const [location, setLocation] = useState<LocationSelection>(
     initialLocation || {
       country: 'India',
       state: 'Telangana',
       city: 'Warangal',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
+      cafe: 'Celpin Heritage Café',
+      cafeDesk: 'Celpin Heritage Café'
     }
   );
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   
@@ -96,11 +99,17 @@ export const BookingPage: React.FC<BookingPageProps> = ({
         if (found && found.status === 'available') {
           setSelectedSeat(found);
           setSelectedZone(found.zone);
+          return;
         }
+      }
+      const defaultSeat = data.seats.find(s => s.zone === initialZone && s.status === 'available') || data.seats.find(s => s.status === 'available');
+      if (defaultSeat) {
+        setSelectedSeat(defaultSeat);
+        setSelectedZone(defaultSeat.zone);
       }
     });
     api.getMenu().then(data => setMenuItems(data.items));
-  }, [initialSeatId]);
+  }, [initialSeatId, initialZone]);
 
   const availablePrefTags = [
     'near power socket',
@@ -132,11 +141,27 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     });
   };
 
-  // Pricing calculations
-  const hourlyRate = selectedSeat?.hourlyRate || (selectedZone === 'quiet' ? 60 : selectedZone === 'collaboration' ? 70 : selectedZone === 'window' ? 80 : 100);
+  // Zone hourly rates mapping
+  const ZONE_RATES: Record<WorkspaceZone, number> = {
+    quiet: 99,
+    collaboration: 129,
+    window: 149,
+    premium: 199
+  };
+
+  // Pricing calculations: guarantees booking summary hourly rate strictly matches the zone rate
+  const activeZone: WorkspaceZone = selectedSeat?.zone || selectedZone;
+  const hourlyRate = ZONE_RATES[activeZone] || 99;
   const rawSeatCost = hourlyRate * duration;
-  const dailyCapApplied = rawSeatCost > 399;
-  const seatCost = dailyCapApplied ? 399 : rawSeatCost;
+  const seatCost = rawSeatCost;
+
+  const handleZoneSelect = (zoneId: WorkspaceZone) => {
+    setSelectedZone(zoneId);
+    const seatInZone = seats.find(s => s.zone === zoneId && s.status === 'available');
+    if (seatInZone) {
+      setSelectedSeat(seatInZone);
+    }
+  };
 
   const foodCost = Object.entries(cart).reduce((total, [id, qty]) => {
     const item = menuItems.find(i => i.id === id);
@@ -182,21 +207,57 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   };
 
   const zonesList = [
-    { id: 'quiet' as const, name: 'Quiet Zone', rate: 60, desc: 'Silent, focused work with noise-dampening panels.', icon: <Headphones className="h-5 w-5" /> },
-    { id: 'collaboration' as const, name: 'Collaboration Table', rate: 70, desc: 'Open shared table ideal for team brainstorming.', icon: <Users className="h-5 w-5" /> },
-    { id: 'window' as const, name: 'Window Seat', rate: 80, desc: 'Bright natural light with a view — creative flow.', icon: <Sun className="h-5 w-5" /> },
-    { id: 'premium' as const, name: 'Premium Desk', rate: 100, desc: 'Motorized standing desk and dual monitor mount.', icon: <Crown className="h-5 w-5" /> }
+    {
+      id: 'quiet' as const,
+      name: 'Quiet Zone',
+      badge: 'Focused Pod',
+      rating: '4.7',
+      hourlyRate: 99,
+      desc: 'Silent, focused work with comfortable seating and book-friendly desk.',
+      icon: <Headphones className="h-5 w-5" />
+    },
+    {
+      id: 'collaboration' as const,
+      name: 'Collaboration Table',
+      badge: 'Team Synergy',
+      rating: '4.8',
+      hourlyRate: 129,
+      desc: 'Open shared table with desk lamp, ideal for team brainstorming.',
+      icon: <Users className="h-5 w-5" />
+    },
+    {
+      id: 'window' as const,
+      name: 'Window Seat',
+      badge: 'Natural Light',
+      rating: '4.9',
+      hourlyRate: 149,
+      desc: 'Bright natural light and soft seating — creative flow.',
+      icon: <Sun className="h-5 w-5" />
+    },
+    {
+      id: 'premium' as const,
+      name: 'Premium Desk',
+      badge: 'Executive Suite',
+      rating: '5.0',
+      hourlyRate: 199,
+      desc: 'Private workspace with WiFi access, power socket, adjustable light, and comfortable seating.',
+      icon: <Crown className="h-5 w-5" />
+    }
   ];
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-10 lg:py-16">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">Book Your Workspace</h1>
-        <p className="mt-2 text-muted-foreground">Pick a seat, set your time, add coffee, and check out.</p>
+        <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
+          {t('booking.title', 'Book Your Workspace')}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {t('booking.subtitle', 'Pick a seat, set your time, and generate your digital access pass.')}
+        </p>
       </div>
 
-      {/* Progress Bar 4 Steps */}
+      {/* Progress Bar 3 Steps */}
       <div className="mb-10">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Step 1 */}
@@ -207,7 +268,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
               1
             </div>
             <span className={`hidden sm:block text-sm font-medium ${step >= 1 ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Workspace
+              {t('booking.step1', 'Workspace')}
             </span>
           </div>
           <div className={`flex-1 h-0.5 rounded-full transition-colors ${step >= 2 ? 'bg-primary' : 'bg-border'}`}></div>
@@ -220,33 +281,20 @@ export const BookingPage: React.FC<BookingPageProps> = ({
               2
             </div>
             <span className={`hidden sm:block text-sm font-medium ${step >= 2 ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Duration
+              {t('booking.step2', 'Duration')}
             </span>
           </div>
           <div className={`flex-1 h-0.5 rounded-full transition-colors ${step >= 3 ? 'bg-primary' : 'bg-border'}`}></div>
 
           {/* Step 3 */}
-          <div className="flex items-center gap-2 sm:gap-3 cursor-pointer" onClick={() => !bookingResult && selectedSeat && setStep(3)}>
+          <div className="flex items-center gap-2 sm:gap-3">
             <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all ${
               step >= 3 ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'
             }`}>
               3
             </div>
             <span className={`hidden sm:block text-sm font-medium ${step >= 3 ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Add-ons
-            </span>
-          </div>
-          <div className={`flex-1 h-0.5 rounded-full transition-colors ${step >= 4 ? 'bg-primary' : 'bg-border'}`}></div>
-
-          {/* Step 4 */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all ${
-              step >= 4 ? 'bg-primary text-primary-foreground ring-4 ring-primary/20' : 'bg-muted text-muted-foreground'
-            }`}>
-              4
-            </div>
-            <span className={`hidden sm:block text-sm font-medium ${step >= 4 ? 'text-foreground' : 'text-muted-foreground'}`}>
-              Payment
+              {t('booking.step3', 'Digital Pass')}
             </span>
           </div>
         </div>
@@ -264,9 +312,25 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 onChange={(sel) => setLocation(sel)}
               />
 
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-card border border-border shadow-xs">
+                <div>
+                  <span className="text-[11px] uppercase font-bold tracking-wider text-primary">Selected Café</span>
+                  <h3 className="text-base font-bold text-foreground">{location.cafe || location.cafeDesk || 'Celpin Heritage Café'}</h3>
+                  <p className="text-xs text-muted-foreground">{location.city}, {location.state} • {location.date}</p>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success/10 text-success text-xs font-semibold self-start sm:self-auto">
+                  <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
+                  Real-Time Desks Available
+                </div>
+              </div>
+
               <div>
-                <h2 className="text-xl font-semibold mb-1">Select your workspace</h2>
-                <p className="text-sm text-muted-foreground">Choose a zone type, then pick an available seat.</p>
+                <h2 className="text-xl font-semibold mb-1">
+                  {t('booking.selectWorkspace', 'Select your workspace')}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Pick a workspace zone and reserve your seat at {location.cafe || location.cafeDesk || 'the selected café'}.
+                </p>
               </div>
 
               <div className="space-y-4">
@@ -278,7 +342,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   return (
                     <div
                       key={z.id}
-                      onClick={() => setSelectedZone(z.id)}
+                      onClick={() => handleZoneSelect(z.id)}
                       className={`rounded-xl border p-5 transition-all cursor-pointer ${
                         isZoneActive
                           ? 'border-primary ring-2 ring-primary/20 bg-card shadow-md'
@@ -295,9 +359,13 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                             <p className="text-sm text-muted-foreground mt-0.5">{z.desc}</p>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-bold text-base">₹{z.rate}</p>
-                          <p className="text-xs text-muted-foreground">/hour</p>
+                        <div className="text-right shrink-0 flex flex-col items-end gap-1.5">
+                          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                            {z.badge}
+                          </span>
+                          <span className="font-display font-extrabold text-base text-foreground">
+                            ₹{z.hourlyRate} <span className="text-xs font-normal text-muted-foreground">/ hr</span>
+                          </span>
                         </div>
                       </div>
 
@@ -376,10 +444,10 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   ))}
                 </div>
 
-                {dailyCapApplied && (
+                {duration >= 4 && (
                   <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-success text-xs font-medium flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 shrink-0" />
-                    Daily Maximum Cap of ₹399 applied! You save ₹{rawSeatCost - 399}.
+                    Extended Focus Pass active! Full-day uninterrupted access granted for your session.
                   </div>
                 )}
               </div>
@@ -411,61 +479,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
             </div>
           )}
 
-          {/* STEP 3: Café Pre-Orders */}
+          {/* STEP 3: Payment or QR Check-in Display */}
           {step === 3 && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div>
-                <h2 className="text-xl font-semibold mb-1">Pre-Order Food & Drinks</h2>
-                <p className="text-sm text-muted-foreground">Items will be freshly prepared and brought to your desk upon QR check-in.</p>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                {menuItems.map(item => {
-                  const qty = cart[item.id] || 0;
-                  return (
-                    <div
-                      key={item.id}
-                      className="rounded-xl border border-border bg-card p-4 flex items-center justify-between shadow-xs"
-                    >
-                      <div className="flex-1 pr-3">
-                        <p className="font-medium text-sm text-foreground">{item.name}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{item.description}</p>
-                        <p className="text-sm font-semibold mt-1">₹{item.price}</p>
-                      </div>
-
-                      {qty > 0 ? (
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateCart(item.id, -1)}
-                            className="h-8 w-8 rounded-lg border border-border flex items-center justify-center hover:bg-accent text-foreground"
-                          >
-                            <Minus className="h-3.5 w-3.5" />
-                          </button>
-                          <span className="font-bold text-sm w-4 text-center">{qty}</span>
-                          <button
-                            onClick={() => updateCart(item.id, 1)}
-                            className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90"
-                          >
-                            <Plus className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => updateCart(item.id, 1)}
-                          className="h-8 px-3 rounded-lg border border-input bg-background hover:bg-accent hover:text-accent-foreground text-xs font-medium inline-flex items-center gap-1 shadow-xs"
-                        >
-                          <Plus className="h-3.5 w-3.5" /> Add
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: Payment or QR Check-in Display */}
-          {step === 4 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               {bookingResult ? (
                 /* Booking Success / QR Pass */
@@ -492,8 +507,11 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-border text-left text-xs">
                       <div>
-                        <span className="text-muted-foreground">Hub / Location:</span>
-                        <p className="font-bold text-sm text-foreground">{location.city}, {location.state}</p>
+                        <span className="text-muted-foreground">City &amp; Café:</span>
+                        <p className="font-bold text-sm text-foreground">{location.city}</p>
+                        {(location.cafe || location.cafeDesk) && (
+                          <p className="text-[11px] text-primary font-medium mt-0.5 leading-snug">{location.cafe || location.cafeDesk}</p>
+                        )}
                       </div>
                       <div>
                         <span className="text-muted-foreground">Booking Date:</span>
@@ -504,16 +522,16 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                         <p className="font-bold text-sm text-foreground">{bookingResult.seatId} ({bookingResult.zone})</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Duration:</span>
-                        <p className="font-bold text-sm text-foreground">{bookingResult.durationHours} Hours</p>
+                        <span className="text-muted-foreground">Duration &amp; Total:</span>
+                        <p className="font-bold text-sm text-foreground">{bookingResult.durationHours} Hours • ₹{bookingResult.totalCost || grandTotal}</p>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Entry PIN:</span>
                         <p className="font-mono font-bold text-sm text-foreground">{bookingResult.pin}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Total Paid:</span>
-                        <p className="font-bold text-sm text-success">₹{bookingResult.totalCost}</p>
+                        <span className="text-muted-foreground">Access Status:</span>
+                        <p className="font-bold text-sm text-success">Confirmed &amp; Active</p>
                       </div>
                     </div>
                   </div>
@@ -540,8 +558,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 /* Payment form */
                 <div className="rounded-xl border border-border bg-card p-6 shadow-xs space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Complete Payment</h2>
-                    <p className="text-sm text-muted-foreground">Select your payment method and enter contact information.</p>
+                    <h2 className="text-xl font-semibold mb-1">Access Pass Delivery</h2>
+                    <p className="text-sm text-muted-foreground">Select your pass delivery preference and confirm your reservation details.</p>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
@@ -554,8 +572,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                       <div className="flex items-center gap-3">
                         <Wallet className="h-5 w-5 text-primary" />
                         <div>
-                          <p className="text-sm font-semibold">UPI / QR Payment</p>
-                          <p className="text-xs text-muted-foreground">GPay, PhonePe, Paytm</p>
+                          <p className="text-sm font-semibold">Mobile Pass &amp; WhatsApp</p>
+                          <p className="text-xs text-muted-foreground">Instant QR sent to your phone</p>
                         </div>
                       </div>
                     </div>
@@ -569,8 +587,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                       <div className="flex items-center gap-3">
                         <CreditCard className="h-5 w-5 text-primary" />
                         <div>
-                          <p className="text-sm font-semibold">Credit / Debit Card</p>
-                          <p className="text-xs text-muted-foreground">Visa, Mastercard, RuPay</p>
+                          <p className="text-sm font-semibold">Email Pass &amp; Calendar</p>
+                          <p className="text-xs text-muted-foreground">Direct pass &amp; calendar invite</p>
                         </div>
                       </div>
                     </div>
@@ -587,7 +605,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Email for Pass & Receipt</label>
+                      <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Email for Pass &amp; Entry PIN</label>
                       <input
                         type="email"
                         value={customerEmail}
@@ -599,7 +617,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
                   <div className="p-4 rounded-xl bg-accent/40 border border-border flex items-center gap-3 text-xs text-muted-foreground">
                     <ShieldCheck className="h-5 w-5 text-success shrink-0" />
-                    <span>256-bit encrypted checkout. You will earn +{Math.round(grandTotal / 25)} reward credits with this booking!</span>
+                    <span>Instant encrypted verification. You will earn +25 loyalty credits with this reservation!</span>
                   </div>
                 </div>
               )}
@@ -610,14 +628,16 @@ export const BookingPage: React.FC<BookingPageProps> = ({
         {/* Sticky Booking Summary Sidebar */}
         <div className="lg:col-span-1">
           <div className="rounded-2xl border border-border bg-card shadow-sm sticky top-24 p-6 space-y-5">
-            <h3 className="font-semibold tracking-tight text-lg">Booking Summary</h3>
+            <h3 className="font-semibold tracking-tight text-lg">
+              {t('booking.summary', 'Booking Summary')}
+            </h3>
 
             {selectedSeat ? (
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Location</span>
+                  <span className="text-muted-foreground">{t('booking.location', 'City')}</span>
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
-                    {location.city}, {location.state}
+                    {location.city}
                     {step > 1 && (
                       <button
                         onClick={() => setStep(1)}
@@ -628,8 +648,16 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     )}
                   </span>
                 </div>
+                {(location.cafe || location.cafeDesk) && (
+                  <div className="flex justify-between items-start pb-2 border-b border-border/60">
+                    <span className="text-muted-foreground shrink-0">Selected Café</span>
+                    <span className="font-semibold text-foreground text-right text-xs max-w-[190px] leading-snug">
+                      {location.cafe || location.cafeDesk}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Date</span>
+                  <span className="text-muted-foreground">{t('booking.date', 'Date')}</span>
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
                     {location.date}
                     {step > 1 && (
@@ -643,60 +671,102 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Seat</span>
+                  <span className="text-muted-foreground">{t('booking.seat', 'Seat')}</span>
                   <span className="font-bold text-foreground">{selectedSeat.name} ({selectedSeat.zone})</span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium text-foreground">{duration} Hour{duration > 1 ? 's' : ''}</span>
+                  <span className="text-muted-foreground">Hourly Rate</span>
+                  <span className="font-semibold text-foreground">₹{hourlyRate} / hr</span>
                 </div>
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Workspace Cost</span>
-                  <span className="font-medium text-foreground">
-                    ₹{seatCost} {dailyCapApplied && <span className="text-xs text-success font-semibold">(Cap)</span>}
-                  </span>
+                  <label htmlFor="summary-duration-select" className="text-muted-foreground font-medium">
+                    {t('booking.duration', 'Duration')}
+                  </label>
+                  <select
+                    id="summary-duration-select"
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2.5 py-1 text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
+                  >
+                    {[1, 2, 3, 4, 5, 6].map(hrs => (
+                      <option key={hrs} value={hrs} className="bg-card text-foreground">
+                        {hrs} Hour{hrs > 1 ? 's' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Seat Amount</span>
+                  <span className="font-semibold text-foreground">₹{seatCost}</span>
                 </div>
 
-                {foodCost > 0 && (
+                {Object.keys(cart).length > 0 && (
                   <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                    <span className="text-muted-foreground">Café Add-ons</span>
+                    <span className="text-muted-foreground">Café Pre-Orders</span>
                     <span className="font-medium text-foreground">₹{foodCost}</span>
                   </div>
                 )}
 
                 <div className="pt-2 flex justify-between items-baseline">
-                  <span className="font-bold text-base">Total</span>
-                  <span className="font-display text-2xl font-bold text-primary">₹{grandTotal}</span>
+                  <span className="font-bold text-base">Total Amount</span>
+                  <span className="font-display text-2xl font-black text-primary">₹{grandTotal}</span>
                 </div>
               </div>
             ) : (
-              <div className="py-4 text-center">
-                <p className="text-sm text-muted-foreground italic">No seat selected yet</p>
-                <div className="pt-4 flex justify-between items-baseline border-t border-border mt-4">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-display text-2xl font-bold text-primary">₹0</span>
+              <div className="py-2 space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-border/60 text-sm">
+                  <span className="text-muted-foreground">Active Zone</span>
+                  <span className="font-semibold text-foreground">
+                    {zonesList.find(z => z.id === selectedZone)?.name || selectedZone}
+                  </span>
                 </div>
+                <div className="flex justify-between items-center pb-2 border-b border-border/60 text-sm">
+                  <span className="text-muted-foreground">Hourly Rate</span>
+                  <span className="font-bold text-foreground">₹{ZONE_RATES[selectedZone]} / hr</span>
+                </div>
+                <div className="flex justify-between items-center pb-2 border-b border-border/60 text-sm">
+                  <label htmlFor="unselected-duration" className="text-muted-foreground font-medium">
+                    Duration
+                  </label>
+                  <select
+                    id="unselected-duration"
+                    value={duration}
+                    onChange={(e) => setDuration(Number(e.target.value))}
+                    className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2.5 py-1 text-sm font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
+                  >
+                    {[1, 2, 3, 4, 5, 6].map(hrs => (
+                      <option key={hrs} value={hrs} className="bg-card text-foreground">
+                        {hrs} Hour{hrs > 1 ? 's' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-between items-baseline pt-1 border-t border-border/60">
+                  <span className="font-bold text-base">Estimated Total</span>
+                  <span className="font-display text-2xl font-black text-primary">₹{ZONE_RATES[selectedZone] * duration}</span>
+                </div>
+                <p className="text-xs text-center text-muted-foreground italic">Click any available seat tile to confirm</p>
               </div>
             )}
 
             {!bookingResult && (
               <div className="pt-2 space-y-2">
-                {step < 4 ? (
+                {step < 3 ? (
                   <button
                     disabled={!selectedSeat}
                     onClick={() => setStep((step + 1) as any)}
                     className="w-full inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl gap-1.5 shadow-sm disabled:opacity-50 disabled:pointer-events-none transition-colors"
                   >
-                    Continue to {step === 1 ? 'Duration' : step === 2 ? 'Add-ons' : 'Payment'}
+                    Continue to {step === 1 ? 'Duration' : 'Access Pass'}
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </button>
                 ) : (
                   <button
                     disabled={isSubmitting || !selectedSeat}
                     onClick={handleConfirmBooking}
-                    className="w-full inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl gap-2 shadow-sm disabled:opacity-50 transition-colors"
+                    className="w-full inline-flex items-center justify-center font-semibold bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl gap-2 shadow-sm disabled:opacity-50 transition-colors cursor-pointer"
                   >
-                    {isSubmitting ? 'Processing...' : `Pay ₹${grandTotal} & Get Pass`}
+                    {isSubmitting ? 'Generating...' : t('booking.confirmBtn', 'Confirm & Generate Access Pass')}
                   </button>
                 )}
 
@@ -711,12 +781,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
               </div>
             )}
 
-            <button
-              onClick={() => onNavigate('floor-map')}
-              className="w-full inline-flex items-center justify-center text-xs text-muted-foreground hover:text-foreground pt-2 border-t border-border transition-colors gap-1"
-            >
-              Prefer visual floor map? View Floor Map <ArrowRight className="h-3 w-3" />
-            </button>
+
           </div>
         </div>
       </div>

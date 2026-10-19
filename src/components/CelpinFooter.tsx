@@ -18,12 +18,12 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
             >
               <img
                 src="/images/celpin-emblem.png"
-                alt="Celpin Coworking Logo"
+                alt="Celpin Coworking Space Logo"
                 className="h-10 w-10 sm:h-11 sm:w-11 rounded-xl object-cover shadow-sm ring-1 ring-border/50 group-hover:scale-105 transition-transform"
               />
               <div className="flex flex-col justify-center py-0.5">
                 <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-foreground leading-none mb-1.5">Celpin</span>
-                <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Coworking</span>
+                <span className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">Coworking Space</span>
               </div>
             </button>
             <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
@@ -103,7 +103,6 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
 
         <div className="mt-10 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">© 2026 Celpin. All rights reserved.</p>
-          <p className="text-xs text-muted-foreground">Smart Co-Working Café</p>
         </div>
       </div>
     </footer>

@@ -12,27 +12,27 @@ export const api = {
       // Fallback local data if backend server is not running
       return {
         zones: {
-          quiet: { id: 'quiet', name: 'Quiet Zone', hourlyRate: 60, description: 'Silent, focused work with noise-dampening panels and ergonomic seating.', icon: 'headphones', colorClass: 'chart-2', features: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'] },
-          collaboration: { id: 'collaboration', name: 'Collaboration Table', hourlyRate: 70, description: 'Open shared table ideal for team brainstorming and pair work.', icon: 'users', colorClass: 'chart-4', features: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'] },
-          window: { id: 'window', name: 'Window Seat', hourlyRate: 80, description: 'Bright natural light with a view — perfect for creative flow.', icon: 'sun', colorClass: 'chart-3', features: ['Natural light', 'City view', 'Power socket', 'Cozy corner'] },
-          premium: { id: 'premium', name: 'Premium Desk', hourlyRate: 100, description: 'Private desk with adjustable standing option and premium amenities.', icon: 'crown', colorClass: 'chart-1', features: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'] }
+          quiet: { id: 'quiet', name: 'Quiet Zone', hourlyRate: 99, description: 'Silent, focused work with noise-dampening panels and ergonomic seating.', icon: 'headphones', colorClass: 'chart-2', features: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'] },
+          collaboration: { id: 'collaboration', name: 'Collaboration Table', hourlyRate: 129, description: 'Open shared table ideal for team brainstorming and pair work.', icon: 'users', colorClass: 'chart-4', features: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'] },
+          window: { id: 'window', name: 'Window Seat', hourlyRate: 149, description: 'Bright natural light with a view — perfect for creative flow.', icon: 'sun', colorClass: 'chart-3', features: ['Natural light', 'City view', 'Power socket', 'Cozy corner'] },
+          premium: { id: 'premium', name: 'Premium Desk', hourlyRate: 199, description: 'Private desk with adjustable standing option and premium amenities.', icon: 'crown', colorClass: 'chart-1', features: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'] }
         },
         seats: [
-          { id: 'Q1', name: 'Q1', zone: 'quiet', status: 'available', hourlyRate: 60, coordinates: { x: 15, y: 20 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Corner quiet desk with optimal acoustic dampening.' },
-          { id: 'Q2', name: 'Q2', zone: 'quiet', status: 'occupied', hourlyRate: 60, coordinates: { x: 15, y: 40 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Central quiet desk with high partition screens.' },
-          { id: 'Q3', name: 'Q3', zone: 'quiet', status: 'available', hourlyRate: 60, coordinates: { x: 15, y: 60 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Quiet desk positioned near library bookshelves.' },
-          { id: 'Q4', name: 'Q4', zone: 'quiet', status: 'available', hourlyRate: 60, coordinates: { x: 15, y: 80 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Quiet desk with extra wide surface area.' },
-          { id: 'C1', name: 'C1', zone: 'collaboration', status: 'available', hourlyRate: 70, coordinates: { x: 42, y: 25 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'North-facing collaboration seat with whiteboard view.' },
-          { id: 'C2', name: 'C2', zone: 'collaboration', status: 'available', hourlyRate: 70, coordinates: { x: 52, y: 25 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'Collaboration bench seat beside digital screen.' },
-          { id: 'C3', name: 'C3', zone: 'collaboration', status: 'occupied', hourlyRate: 70, coordinates: { x: 42, y: 42 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'South-facing shared desk for pair work.' },
-          { id: 'C4', name: 'C4', zone: 'collaboration', status: 'available', hourlyRate: 70, coordinates: { x: 52, y: 42 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'Collaboration table end seat.' },
-          { id: 'W1', name: 'W1', zone: 'window', status: 'available', hourlyRate: 80, coordinates: { x: 80, y: 18 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Top window bay seat overlooking boulevard.' },
-          { id: 'W2', name: 'W2', zone: 'window', status: 'reserved', hourlyRate: 80, coordinates: { x: 80, y: 38 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Panoramic window seat for sketching.' },
-          { id: 'W3', name: 'W3', zone: 'window', status: 'available', hourlyRate: 80, coordinates: { x: 80, y: 58 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Sunlit desk with cushioned armrest.' },
-          { id: 'W4', name: 'W4', zone: 'window', status: 'available', hourlyRate: 80, coordinates: { x: 80, y: 78 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Lower window lounge desk.' },
-          { id: 'P1', name: 'P1', zone: 'premium', status: 'available', hourlyRate: 100, coordinates: { x: 38, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Electric motorized standing desk with Herman Miller chair.' },
-          { id: 'P2', name: 'P2', zone: 'premium', status: 'occupied', hourlyRate: 100, coordinates: { x: 50, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Executive motorized desk with external display.' },
-          { id: 'P3', name: 'P3', zone: 'premium', status: 'available', hourlyRate: 100, coordinates: { x: 62, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Spacious ergonomic standing desk.' }
+          { id: 'Q1', name: 'Q1', zone: 'quiet', status: 'available', hourlyRate: 99, coordinates: { x: 15, y: 20 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Corner quiet desk with optimal acoustic dampening.' },
+          { id: 'Q2', name: 'Q2', zone: 'quiet', status: 'occupied', hourlyRate: 99, coordinates: { x: 15, y: 40 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Central quiet desk with high partition screens.' },
+          { id: 'Q3', name: 'Q3', zone: 'quiet', status: 'available', hourlyRate: 99, coordinates: { x: 15, y: 60 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Quiet desk positioned near library bookshelves.' },
+          { id: 'Q4', name: 'Q4', zone: 'quiet', status: 'available', hourlyRate: 99, coordinates: { x: 15, y: 80 }, amenities: ['Noise-dampening', 'Ergonomic chair', 'Power socket', 'Reading lamp'], description: 'Quiet desk with extra wide surface area.' },
+          { id: 'C1', name: 'C1', zone: 'collaboration', status: 'available', hourlyRate: 129, coordinates: { x: 42, y: 25 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'North-facing collaboration seat with whiteboard view.' },
+          { id: 'C2', name: 'C2', zone: 'collaboration', status: 'available', hourlyRate: 129, coordinates: { x: 52, y: 25 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'Collaboration bench seat beside digital screen.' },
+          { id: 'C3', name: 'C3', zone: 'collaboration', status: 'occupied', hourlyRate: 129, coordinates: { x: 42, y: 42 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'South-facing shared desk for pair work.' },
+          { id: 'C4', name: 'C4', zone: 'collaboration', status: 'available', hourlyRate: 129, coordinates: { x: 52, y: 42 }, amenities: ['Shared table', 'Whiteboard access', 'Power sockets', 'Group-friendly'], description: 'Collaboration table end seat.' },
+          { id: 'W1', name: 'W1', zone: 'window', status: 'available', hourlyRate: 149, coordinates: { x: 80, y: 18 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Top window bay seat overlooking boulevard.' },
+          { id: 'W2', name: 'W2', zone: 'window', status: 'reserved', hourlyRate: 149, coordinates: { x: 80, y: 38 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Panoramic window seat for sketching.' },
+          { id: 'W3', name: 'W3', zone: 'window', status: 'available', hourlyRate: 149, coordinates: { x: 80, y: 58 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Sunlit desk with cushioned armrest.' },
+          { id: 'W4', name: 'W4', zone: 'window', status: 'available', hourlyRate: 149, coordinates: { x: 80, y: 78 }, amenities: ['Natural light', 'City view', 'Power socket', 'Cozy corner'], description: 'Lower window lounge desk.' },
+          { id: 'P1', name: 'P1', zone: 'premium', status: 'available', hourlyRate: 199, coordinates: { x: 38, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Electric motorized standing desk with Herman Miller chair.' },
+          { id: 'P2', name: 'P2', zone: 'premium', status: 'occupied', hourlyRate: 199, coordinates: { x: 50, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Executive motorized desk with external display.' },
+          { id: 'P3', name: 'P3', zone: 'premium', status: 'available', hourlyRate: 199, coordinates: { x: 62, y: 72 }, amenities: ['Standing desk', 'Privacy screen', 'Dual monitor mount', 'Premium chair'], description: 'Spacious ergonomic standing desk.' }
         ],
         stats: { total: 15, available: 11, occupied: 3, reserved: 1 }
       };
@@ -121,16 +121,16 @@ export const api = {
           nextTierPoints: 1000
         },
         rewards: [
-          { id: 'free-hour', name: 'Free Hour — Any Zone', description: 'Redeem for 1 hour of workspace time', creditCost: 150, icon: 'clock' },
+          { id: 'free-hour', name: 'Dedicated Focus Session', description: 'Redeem for an extended workspace session', creditCost: 150, icon: 'clock' },
           { id: 'free-cappuccino', name: 'Free Cappuccino', description: 'A fresh cappuccino, on the house', creditCost: 50, icon: 'coffee' },
-          { id: 'discount-100', name: '₹100 Off Next Booking', description: 'Flat discount on your next session', creditCost: 200, icon: 'gift' },
-          { id: 'free-premium-hour', name: 'Free Premium Desk Hour', description: '1 hour at our premium standing desk', creditCost: 250, icon: 'crown' }
+          { id: 'discount-100', name: 'Priority Pass Upgrade', description: 'Instant upgrade to executive cabin', creditCost: 200, icon: 'gift' },
+          { id: 'free-premium-hour', name: 'Executive Suite Access', description: 'Access to our premium ergonomic suite', creditCost: 250, icon: 'crown' }
         ],
         tiers: [
-          { name: 'Bronze', pointsRequired: 0, icon: 'star', perks: ['1 credit per ₹50 spent', 'Access to all zones'] },
-          { name: 'Silver', pointsRequired: 500, icon: 'zap', perks: ['1.5 credits per ₹50', '10% off café items', 'Priority seat notifications'] },
-          { name: 'Gold', pointsRequired: 1000, icon: 'crown', perks: ['2 credits per ₹50', '15% off café items', 'Free coffee every 10 visits', 'Early access to premium seats'] },
-          { name: 'Platinum', pointsRequired: 2500, icon: 'award', perks: ['3 credits per ₹50', '20% off everything', 'Guaranteed seat reservation', 'Free hour every day'] }
+          { name: 'Bronze', pointsRequired: 0, icon: 'star', perks: ['1 credit per booking session', 'Access to all zones'] },
+          { name: 'Silver', pointsRequired: 500, icon: 'zap', perks: ['1.5 credits per session', 'Complimentary café upgrades', 'Priority seat notifications'] },
+          { name: 'Gold', pointsRequired: 1000, icon: 'crown', perks: ['2 credits per session', 'Priority café perks', 'Complimentary beverage every 10 visits', 'Early access to premium pods'] },
+          { name: 'Platinum', pointsRequired: 2500, icon: 'award', perks: ['3 credits per session', 'Priority access across all zones', 'Guaranteed seat reservation', 'Unlimited quiet pod reservations'] }
         ],
         activity: [
           { id: 'act-1', type: 'earned', title: 'Earned credits', credits: 40, description: '3h at Window Seat W3', date: 'Aug 20' },
@@ -167,7 +167,7 @@ export const api = {
       return await res.json();
     } catch {
       return {
-        reply: "Celpin blends flexible co-working with artisanal café comfort! Rates range from ₹60 to ₹100/hr, with a daily maximum cap of ₹399. You can choose a seat from the floor map, pre-order coffee to your desk, and check in with a quick QR scan."
+        reply: "Celpin blends flexible co-working with artisanal café comfort! You can choose your preferred zone from the interactive floor map, request desk amenities, and check in instantly with a quick QR scan."
       };
     }
   }

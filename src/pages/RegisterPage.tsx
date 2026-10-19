@@ -12,11 +12,8 @@ import {
   Coffee,
   ShieldCheck,
   Star,
-  Users,
   Building2,
-  Calendar,
-  Check,
-  Laptop
+  Check
 } from 'lucide-react';
 
 interface RegisterPageProps {
@@ -148,7 +145,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
             </button>
             <span>/</span>
             <span className="font-semibold text-foreground">
-              {authMode === 'register' ? 'Member Registration' : 'Account Sign In'}
+              {authMode === 'register' ? 'Member Account' : 'Account Sign In'}
             </span>
           </div>
 
@@ -169,7 +166,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 lg:py-14">
         <div className="grid lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {/* LEFT COLUMN: Value Proposition & Brand Showcase (5 cols on lg) */}
+          {/* LEFT COLUMN: Value Proposition & Brand Showcase */}
           <div className="lg:col-span-5 space-y-8">
             {/* Header Lockup */}
             <div>
@@ -193,8 +190,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold">Zero Commitments, Pay As You Go</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">Hourly rates with automatic ₹399 daily price protection cap.</p>
+                  <h2 className="text-sm font-semibold">Instant Access, Flexible Sessions</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Reserve on-demand seating with immediate digital pass generation.</p>
                 </div>
               </div>
 
@@ -242,7 +239,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Redesigned Registration Card (7 cols on lg) */}
+          {/* RIGHT COLUMN: Clean Account Card */}
           <div className="lg:col-span-7">
             <div className="rounded-3xl border border-border bg-card shadow-xl p-6 sm:p-8 lg:p-10 transition-all">
               
@@ -258,7 +255,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                     </h2>
                     <p className="mt-2 text-sm text-muted-foreground max-w-md mx-auto">
                       {authMode === 'register'
-                        ? 'Your membership account is ready. Your ₹100 welcome coffee credit has been applied to your profile.'
+                        ? 'Your membership account is ready. Your complimentary welcome pass has been applied to your profile.'
                         : 'You have signed in successfully. Ready to book your next workspace?'}
                     </p>
                   </div>
@@ -296,15 +293,17 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 /* MAIN FORM */
                 <div>
                   {/* Auth Mode Tabs */}
-                  <div className="flex items-center justify-between border-b border-border pb-4 mb-6">
+                  <div className="flex items-center justify-between border-b border-border pb-4 mb-6" role="tablist" aria-label="Authentication modes">
                     <div className="flex gap-4">
                       <button
                         type="button"
+                        role="tab"
+                        aria-selected={authMode === 'register'}
                         onClick={() => {
                           setAuthMode('register');
                           setErrorMsg('');
                         }}
-                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative ${
+                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary rounded-t-sm ${
                           authMode === 'register'
                             ? 'text-foreground'
                             : 'text-muted-foreground hover:text-foreground'
@@ -318,11 +317,13 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
 
                       <button
                         type="button"
+                        role="tab"
+                        aria-selected={authMode === 'login'}
                         onClick={() => {
                           setAuthMode('login');
                           setErrorMsg('');
                         }}
-                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative ${
+                        className={`text-lg font-bold pb-1 transition-colors cursor-pointer relative focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary rounded-t-sm ${
                           authMode === 'login'
                             ? 'text-foreground'
                             : 'text-muted-foreground hover:text-foreground'
@@ -336,14 +337,14 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                     </div>
 
                     <span className="text-xs text-muted-foreground">
-                      {authMode === 'register' ? 'Free Registration' : 'Member Portal'}
+                      Complimentary Member Pass
                     </span>
                   </div>
 
                   {/* PROMINENT SOCIAL SIGNUP BUTTONS (GOOGLE & LINKEDIN) */}
                   <div className="space-y-3 mb-6">
                     <div className="grid sm:grid-cols-2 gap-3">
-                      {/* Google Sign In Button */}
+                      {/* Google Button */}
                       <button
                         type="button"
                         onClick={() => handleSocialAuth('google')}
@@ -372,7 +373,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                         </span>
                       </button>
 
-                      {/* LinkedIn Sign In Button */}
+                      {/* LinkedIn Button */}
                       <button
                         type="button"
                         onClick={() => handleSocialAuth('linkedin')}
@@ -401,10 +402,10 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                   </div>
 
                   {/* FORM FIELDS */}
-                  <form onSubmit={handleSubmit} className="space-y-5">
+                  <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                     {/* Error Banner */}
                     {errorMsg && (
-                      <div className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+                      <div id="reg-error-msg" role="alert" className="p-3.5 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
                         {errorMsg}
                       </div>
                     )}
@@ -413,19 +414,24 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <>
                         {/* Full Name */}
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            Full Name
+                          <label htmlFor="reg-full-name" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Full Name <span className="text-destructive" aria-hidden="true">*</span>
                           </label>
                           <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground" aria-hidden="true">
                               <User className="h-4 w-4" />
                             </div>
                             <input
+                              id="reg-full-name"
                               type="text"
+                              required
+                              aria-required="true"
+                              aria-invalid={!!errorMsg && !fullName.trim()}
+                              aria-describedby={errorMsg ? 'reg-error-msg' : undefined}
                               value={fullName}
                               onChange={(e) => setFullName(e.target.value)}
-                              placeholder="e.g. Rahul Verma"
-                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                              placeholder="e.g. Arjun Kumar"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                             />
                           </div>
                         </div>
@@ -434,19 +440,24 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
 
                     {/* Email Field */}
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                        Work or Personal Email
+                      <label htmlFor="reg-email" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                        Work or Personal Email <span className="text-destructive" aria-hidden="true">*</span>
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground" aria-hidden="true">
                           <Mail className="h-4 w-4" />
                         </div>
                         <input
+                          id="reg-email"
                           type="email"
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errorMsg && !email.trim()}
+                          aria-describedby={errorMsg ? 'reg-error-msg' : undefined}
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="you@company.com"
-                          className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                         />
                       </div>
                     </div>
@@ -455,37 +466,39 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       /* Phone Number & Company Row */
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            Phone Number
+                          <label htmlFor="reg-phone" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Phone Number (Optional)
                           </label>
                           <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground" aria-hidden="true">
                               <Phone className="h-4 w-4" />
                             </div>
                             <input
+                              id="reg-phone"
                               type="tel"
                               value={phone}
                               onChange={(e) => setPhone(e.target.value)}
                               placeholder="+91 98765 43210"
-                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                             />
                           </div>
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
-                            Company / Freelance (Optional)
+                          <label htmlFor="reg-company" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+                            Organization / Studio (Optional)
                           </label>
                           <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground" aria-hidden="true">
                               <Building2 className="h-4 w-4" />
                             </div>
                             <input
+                              id="reg-company"
                               type="text"
                               value={companyName}
                               onChange={(e) => setCompanyName(e.target.value)}
-                              placeholder="e.g. Acme Tech Studio"
-                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                              placeholder="e.g. Acme Tech or Freelance"
+                              className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                             />
                           </div>
                         </div>
@@ -495,8 +508,8 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                     {/* Password Field */}
                     <div>
                       <div className="flex items-center justify-between mb-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                          Password
+                        <label htmlFor="reg-password" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          Password <span className="text-destructive" aria-hidden="true">*</span>
                         </label>
                         {authMode === 'login' && (
                           <a href="#forgot" className="text-xs text-primary hover:underline font-medium">
@@ -505,29 +518,35 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                         )}
                       </div>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground" aria-hidden="true">
                           <Lock className="h-4 w-4" />
                         </div>
                         <input
+                          id="reg-password"
                           type={showPassword ? 'text' : 'password'}
+                          required
+                          aria-required="true"
+                          aria-invalid={!!errorMsg && password.length < 6}
+                          aria-describedby={errorMsg ? 'reg-error-msg' : undefined}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          placeholder="••••••••••••"
-                          className="w-full bg-background border border-border rounded-xl pl-10 pr-11 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          placeholder="Minimum 6 characters"
+                          className="w-full bg-background border border-border rounded-xl pl-10 pr-11 py-2.5 text-sm text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary focus:border-primary transition-all"
                         />
                         <button
                           type="button"
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
+                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer focus-visible:outline-hidden focus-visible:text-foreground"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                         </button>
                       </div>
 
-                      {/* Password strength meter for registration */}
+                      {/* Password strength meter */}
                       {authMode === 'register' && password && (
                         <div className="mt-2 space-y-1">
-                          <div className="flex gap-1 h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                          <div className="flex gap-1 h-1.5 w-full bg-muted rounded-full overflow-hidden" role="progressbar" aria-valuenow={passStrength * 25} aria-valuemin={0} aria-valuemax={100}>
                             <div
                               className={`h-full transition-all ${
                                 passStrength <= 1
@@ -553,34 +572,29 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                     {/* Terms & Conditions (Registration only) */}
                     {authMode === 'register' && (
                       <div className="space-y-2 pt-1">
-                        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <label htmlFor="reg-agree-terms" className="flex items-start gap-2.5 cursor-pointer select-none">
                           <input
+                            id="reg-agree-terms"
                             type="checkbox"
                             checked={agreeTerms}
                             onChange={(e) => setAgreeTerms(e.target.checked)}
                             className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary/20 border-border"
                           />
                           <span className="text-xs text-muted-foreground leading-relaxed">
-                            I agree to Celpin’s{' '}
-                            <span className="text-foreground underline decoration-dotted">
-                              Terms of Service
-                            </span>{' '}
-                            and{' '}
-                            <span className="text-foreground underline decoration-dotted">
-                              Privacy Policy
-                            </span>.
+                            I agree to the Terms of Service and Workspace Guidelines
                           </span>
                         </label>
 
-                        <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <label htmlFor="reg-subscribe" className="flex items-start gap-2.5 cursor-pointer select-none">
                           <input
+                            id="reg-subscribe"
                             type="checkbox"
                             checked={subscribeNewsletter}
                             onChange={(e) => setSubscribeNewsletter(e.target.checked)}
                             className="mt-0.5 h-4 w-4 rounded text-primary focus:ring-primary/20 border-border"
                           />
                           <span className="text-xs text-muted-foreground leading-relaxed">
-                            Send me exclusive member perks, discounts &amp; free coffee voucher updates.
+                            Receive complimentary member passes and event updates
                           </span>
                         </label>
                       </div>
@@ -591,19 +605,19 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full h-12 inline-flex items-center justify-center font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-6 gap-2 text-sm sm:text-base shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full min-h-[48px] h-12 inline-flex items-center justify-center font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-6 gap-2 text-sm sm:text-base shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                       >
                         {isSubmitting ? (
                           <span>Processing...</span>
                         ) : authMode === 'register' ? (
                           <>
-                            <span>Create Celpin Account</span>
-                            <ArrowRight className="h-4 w-4" />
+                            <span>Create Account &amp; Continue</span>
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </>
                         ) : (
                           <>
-                            <span>Sign In to Member Portal</span>
-                            <ArrowRight className="h-4 w-4" />
+                            <span>Sign In to Account</span>
+                            <ArrowRight className="h-4 w-4" aria-hidden="true" />
                           </>
                         )}
                       </button>
@@ -614,30 +628,30 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                       <p className="text-xs text-muted-foreground">
                         {authMode === 'register' ? (
                           <>
-                            Already have a Celpin account?{' '}
+                            Already have an account?{' '}
                             <button
                               type="button"
                               onClick={() => {
                                 setAuthMode('login');
                                 setErrorMsg('');
                               }}
-                              className="font-bold text-primary hover:underline cursor-pointer"
+                              className="font-bold text-primary hover:underline cursor-pointer focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary rounded-xs"
                             >
                               Sign In
                             </button>
                           </>
                         ) : (
                           <>
-                            Don’t have an account yet?{' '}
+                            Need an account?{' '}
                             <button
                               type="button"
                               onClick={() => {
                                 setAuthMode('register');
                                 setErrorMsg('');
                               }}
-                              className="font-bold text-primary hover:underline cursor-pointer"
+                              className="font-bold text-primary hover:underline cursor-pointer focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-primary rounded-xs"
                             >
-                              Register here
+                              Create Account
                             </button>
                           </>
                         )}

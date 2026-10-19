@@ -74,7 +74,7 @@ export const ProposalPage: React.FC = () => {
             Celpin is a web application that enables customers to book a workspace by the hour within a café environment, combining the comfort and ambiance of a café with the functionality of a co-working space. The MVP targets freelancers, remote workers, students, and professionals who need a flexible, productive workspace for 1–6 hours without the commitment of a traditional co-working membership.
           </p>
           <p>
-            The core value proposition is simple: <strong>pay for the time you use, work where you're comfortable, and have great coffee delivered to your seat.</strong> With real-time seat availability, four distinct workspace zones, hourly pricing capped at a daily maximum (₹399), integrated café pre-orders, QR-based check-in, and a loyalty rewards system, Celpin delivers a 10/10 experience that merges productivity with café comfort.
+            The core value proposition is simple: <strong>reserve flexible workspace on demand, work where you're comfortable, and have great coffee delivered to your seat.</strong> With real-time seat availability, four distinct workspace zones, instant digital access passes, integrated café pre-orders, QR-based check-in, and a loyalty rewards system, Celpin delivers a 10/10 experience that merges productivity with café comfort.
           </p>
         </div>
       </section>
@@ -89,7 +89,7 @@ export const ProposalPage: React.FC = () => {
         </div>
         <ul className="space-y-3 mt-4">
           {[
-            'Traditional co-working spaces require expensive monthly memberships (₹5,000–₹15,000) — impractical for someone who just needs a desk for 3 hours.',
+            'Traditional co-working spaces require rigid monthly commitments and upfront deposits — impractical for someone who just needs a desk for a few hours.',
             'Regular cafés have unpredictable seating, no guarantee of power sockets, inconsistent Wi-Fi, and implicit pressure to keep ordering food.',
             'There is no way to know in advance whether a café has available seats, leading to wasted trips and frustration.',
             'Freelancers and students lack a professional yet affordable environment for focused work, video calls, or small team meetings.',
@@ -121,8 +121,8 @@ export const ProposalPage: React.FC = () => {
             <p className="text-xs text-muted-foreground mt-1">Quiet Zone, Collaboration Table, Window Seat, or Premium Desk.</p>
           </div>
           <div className="p-4 rounded-xl border border-border bg-card">
-            <p className="font-semibold text-sm text-foreground">Book by the hour</p>
-            <p className="text-xs text-muted-foreground mt-1">1–6 hours with transparent pricing and a ₹399 daily cap.</p>
+            <p className="font-semibold text-sm text-foreground">On-demand access</p>
+            <p className="text-xs text-muted-foreground mt-1">Flexible 1–6 hour sessions with instant digital confirmation.</p>
           </div>
           <div className="p-4 rounded-xl border border-border bg-card">
             <p className="font-semibold text-sm text-foreground">Pre-order to your seat</p>
@@ -179,9 +179,9 @@ export const ProposalPage: React.FC = () => {
           {[
             { step: '01', title: 'Discover', desc: 'User lands on Celpin, explores zone features, and checks the live floor map.' },
             { step: '02', title: 'Select Workspace', desc: 'Selects Quiet Zone, Collaboration Table, Window Seat, or Premium Desk.' },
-            { step: '03', title: 'Choose Duration', desc: 'Chooses 1–6 hours; real-time pricing calculation with daily maximum cap.' },
+            { step: '03', title: 'Choose Duration', desc: 'Chooses 1–6 hours with flexible on-demand allocation.' },
             { step: '04', title: 'Add Café Pre-Orders', desc: 'Adds cappuccino, cold brew, or meals to be delivered upon arrival.' },
-            { step: '05', title: 'Pay', desc: 'Seamless digital payment via UPI, debit/credit cards with instant confirmation.' },
+            { step: '05', title: 'Pass Generation', desc: 'Instant pass creation with encrypted dynamic QR and backup turnstile PIN.' },
             { step: '06', title: 'Work', desc: 'Scans QR pass at entrance scanner; desk unlocks and barista begins order.' },
             { step: '07', title: 'Rate & Earn', desc: 'Submits 5-star rating on Wi-Fi and comfort, earning bonus loyalty credits.' }
           ].map((item, idx) => (
@@ -223,7 +223,7 @@ export const ProposalPage: React.FC = () => {
           <div className="p-4 rounded-xl border border-border bg-card">
             <p className="text-xs font-semibold text-primary uppercase">AI Concierge</p>
             <p className="font-medium mt-1">Contextual Chatbot Assistant</p>
-            <p className="text-xs text-muted-foreground mt-1">Interactive widget answering questions on rates, zones, menu, and passes.</p>
+            <p className="text-xs text-muted-foreground mt-1">Interactive widget answering questions on amenities, zones, menu, and passes.</p>
           </div>
         </div>
       </section>

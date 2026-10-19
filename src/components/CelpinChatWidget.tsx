@@ -7,7 +7,7 @@ export const CelpinChatWidget: React.FC = () => {
   const [messages, setMessages] = useState<Array<{ sender: 'user' | 'bot'; text: string }>>([
     {
       sender: 'bot',
-      text: "Hello! I'm your Celpin AI Concierge. Ask me anything about seats, rates, the ₹399 daily cap, café orders, or QR check-in!"
+      text: "Hello! I'm your Celpin AI Concierge. Ask me anything about seats, zones, amenities, café orders, or QR check-in!"
     }
   ]);
   const [input, setInput] = useState('');
@@ -15,9 +15,9 @@ export const CelpinChatWidget: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const quickPrompts = [
-    "What are the hourly rates?",
-    "How does the ₹399 daily cap work?",
     "What zones are available?",
+    "What amenities are included?",
+    "How does the flexible pass work?",
     "How do I check in with QR?"
   ];
 
@@ -42,7 +42,7 @@ export const CelpinChatWidget: React.FC = () => {
     } catch {
       setMessages(prev => [
         ...prev,
-        { sender: 'bot', text: "Quiet Zone is ₹60/hr, Collaboration is ₹70/hr, Window Seat is ₹80/hr, and Premium Desk is ₹100/hr. All capped at ₹399/day!" }
+        { sender: 'bot', text: "Celpin offers Quiet Focus Pods, Collaborative Hubs, Window Desks, and Executive Suites — all featuring high-speed optical Wi-Fi, ergonomic seating, and instant QR check-in!" }
       ]);
     } finally {
       setLoading(false);
@@ -144,7 +144,7 @@ export const CelpinChatWidget: React.FC = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about seats, rates, orders..."
+              placeholder="Ask about seats, zones, amenities..."
               className="flex-1 bg-background border border-border rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <button
