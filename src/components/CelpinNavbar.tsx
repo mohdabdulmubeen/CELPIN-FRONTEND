@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Menu, X, User } from 'lucide-react';
+import { Menu, X, User, Bell } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { useI18n } from '../i18n/I18nContext';
+import { useNotifications } from '../context/NotificationContext';
 
 interface NavbarProps {
   currentPage: string;
@@ -11,10 +12,12 @@ interface NavbarProps {
 export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t } = useI18n();
+  const { unreadCount, isDrawerOpen, setIsDrawerOpen } = useNotifications();
 
   const navLinks = [
     { id: 'home', labelKey: 'nav.home', defaultLabel: 'Home' },
     { id: 'booking', labelKey: 'nav.bookSeat', defaultLabel: 'Book a Seat' },
+    { id: 'careers', labelKey: 'nav.careers', defaultLabel: 'Careers' },
   ];
 
   return (
@@ -64,7 +67,23 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
           </div>
 
           {/* Right Actions: Clean & Minimal (Theme Toggle, Member Sign In, Book a Seat) */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Notification Bell */}
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+              className="relative inline-flex items-center justify-center h-9 w-9 rounded-xl border border-border/80 bg-card/60 hover:bg-accent text-muted-foreground hover:text-foreground transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="View notifications"
+              title="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-xs animate-in zoom-in-50">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
             {/* Theme Toggle */}
             <ThemeToggle />
 
@@ -123,6 +142,25 @@ export const CelpinNavbar: React.FC<NavbarProps> = ({ currentPage, onNavigate })
                 </button>
               );
             })}
+
+            <button
+              type="button"
+              onClick={() => {
+                setIsDrawerOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-base font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                Notifications
+              </span>
+              {unreadCount > 0 && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-primary text-primary-foreground">
+                  {unreadCount} new
+                </span>
+              )}
+            </button>
 
             <button
               type="button"

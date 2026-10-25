@@ -383,15 +383,10 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
       {/* SECTION 2: Select Café (At least 3 Cafes linked to the selected City) */}
       {!hideCafeGrid && (
         <div className="pt-2 border-t border-border/70">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Coffee className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                Select Café in {city} ({currentCafes.length} Available)
-              </span>
-            </div>
-            <span className="text-xs text-primary font-semibold">
-              Step 1: Choose Your Café
+          <div className="flex items-center gap-2 mb-3">
+            <Coffee className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Select Café in {city} ({currentCafes.length} Available)
             </span>
           </div>
 

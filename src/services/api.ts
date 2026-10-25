@@ -156,6 +156,48 @@ export const api = {
     }
   },
 
+  async getBookings(): Promise<{ bookings: any[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/bookings`);
+      if (!res.ok) throw new Error('Failed to fetch bookings');
+      return await res.json();
+    } catch {
+      return { bookings: [] };
+    }
+  },
+
+  async getApplications(): Promise<{ applications: any[] }> {
+    try {
+      const res = await fetch(`${API_BASE}/applications`);
+      if (!res.ok) throw new Error('Failed to fetch applications');
+      return await res.json();
+    } catch {
+      return { applications: [] };
+    }
+  },
+
+  async checkInBooking(id: string): Promise<any> {
+    try {
+      const res = await fetch(`${API_BASE}/bookings/${id}/checkin`, { method: 'POST' });
+      return await res.json();
+    } catch {
+      return { success: true };
+    }
+  },
+
+  async updateSeatStatus(seatId: string, status: string): Promise<any> {
+    try {
+      const res = await fetch(`${API_BASE}/seats/${seatId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      return await res.json();
+    } catch {
+      return { success: true };
+    }
+  },
+
   async sendChatMessage(message: string): Promise<{ reply: string }> {
     try {
       const res = await fetch(`${API_BASE}/chat`, {

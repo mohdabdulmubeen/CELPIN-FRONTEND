@@ -83,3 +83,16 @@ export interface ActivityLog {
   description: string;
   date: string;
 }
+
+export interface JobListing {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: 'Full-time' | 'Part-time' | 'Contract' | 'Internship' | string;
+  summary: string;
+  description?: string;
+  requirements?: string[];
+  postedDate?: string;
+}
+

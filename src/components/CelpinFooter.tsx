@@ -45,7 +45,6 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
                   Member Registration
                 </button>
               </li>
-              <li><span className="cursor-default">Pricing</span></li>
             </ul>
           </div>
 
@@ -53,9 +52,24 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
           <div>
             <h4 className="text-sm font-semibold mb-3 text-foreground">Company</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><span className="cursor-default">About Us</span></li>
-              <li><span className="cursor-default">Careers</span></li>
-              <li><span className="cursor-default">Contact</span></li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('home')}
+                  className="hover:text-foreground transition-colors cursor-pointer"
+                >
+                  About Us
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('careers')}
+                  className="hover:text-foreground transition-colors cursor-pointer"
+                >
+                  Careers
+                </button>
+              </li>
             </ul>
           </div>
 
