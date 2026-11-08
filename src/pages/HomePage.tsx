@@ -645,7 +645,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">PS</div>
                   <div>
                     <p className="text-sm font-semibold">Priya Sharma</p>
-                    <p className="text-xs text-muted-foreground">Freelance Designer</p>
+                    <p className="text-xs text-muted-foreground">Director, International Partnerships</p>
                   </div>
                 </div>
               </div>
@@ -668,7 +668,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">RK</div>
                   <div>
                     <p className="text-sm font-semibold">Rahul Kapoor</p>
-                    <p className="text-xs text-muted-foreground">Tech Lead</p>
+                    <p className="text-xs text-muted-foreground">Engineering Lead</p>
                   </div>
                 </div>
               </div>
@@ -691,7 +691,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold text-sm">AM</div>
                   <div>
                     <p className="text-sm font-semibold">Ananya Mehta</p>
-                    <p className="text-xs text-muted-foreground">Content Strategist</p>
+                    <p className="text-xs text-muted-foreground">Enterprise AI architect</p>
                   </div>
                 </div>
               </div>
