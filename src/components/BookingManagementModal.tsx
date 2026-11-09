@@ -175,7 +175,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
               <Calendar className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Workspace Bookings &amp; Passes</h2>
+              <h2 className="text-lg font-bold text-foreground">Workspace bookings &amp; passes</h2>
               <p className="text-xs text-muted-foreground">View passes, check real-time availability, modify schedules, or cancel reservations.</p>
             </div>
           </div>
@@ -429,7 +429,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                 <QrCode className="w-8 h-8" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-lg text-foreground">Digital Turnstile Pass</h3>
+                <h3 className="font-display font-bold text-lg text-foreground">Digital turnstile pass</h3>
                 <p className="text-xs text-muted-foreground">Scan at optical scanner or enter 4-digit PIN</p>
               </div>
 
@@ -442,7 +442,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
               </div>
 
               <div className="bg-muted/40 p-3 rounded-xl space-y-1">
-                <span className="text-[11px] text-muted-foreground uppercase font-semibold">Entry PIN Code</span>
+                <span className="text-[11px] text-muted-foreground uppercase font-semibold">Entry PIN code</span>
                 <p className="font-mono text-2xl font-black text-primary tracking-widest">{selectedBooking.pin}</p>
               </div>
 
@@ -484,7 +484,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                   <AlertTriangle className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-bold text-lg text-foreground">Cancel Booking?</h3>
+                  <h3 className="font-display font-bold text-lg text-foreground">Cancel booking?</h3>
                   <p className="text-xs text-muted-foreground">Reference: {cancellationTarget.bookingRef}</p>
                 </div>
               </div>
@@ -562,7 +562,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-base text-foreground">Reschedule Booking</h3>
+                    <h3 className="font-bold text-base text-foreground">Reschedule booking</h3>
                     <p className="text-xs text-muted-foreground">{rescheduleTarget.bookingRef} • Seat {rescheduleTarget.seatId}</p>
                   </div>
                 </div>

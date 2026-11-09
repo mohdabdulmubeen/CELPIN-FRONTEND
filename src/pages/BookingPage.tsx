@@ -11,6 +11,7 @@ import {
   CreditCard,
   Wallet,
   CheckCircle2,
+  Lock,
   Clock,
   Repeat,
   CalendarRange,
@@ -20,7 +21,8 @@ import {
   Info,
   Sparkles,
   Tag,
-  ListFilter
+  ListFilter,
+  Eye
 } from 'lucide-react';
 import { api } from '../services/api';
 import {
@@ -33,10 +35,13 @@ import {
   AvailabilityResult,
   DateItem
 } from '../types';
-import { LocationSelectorBar, LocationSelection } from '../components/LocationSelectorBar';
+import { LocationSelectorBar, LocationSelection, getCafesForCity, CafeOption } from '../components/LocationSelectorBar';
 import { BookingManagementModal } from '../components/BookingManagementModal';
+import { CafeInteriorPreviewModal } from '../components/CafeInteriorPreviewModal';
 import { useI18n } from '../i18n/I18nContext';
 import { useNotifications } from '../context/NotificationContext';
+import { SignInRequiredModal } from '../components/SignInRequiredModal';
+import { getCurrentUser, getPendingBooking, clearPendingBooking, savePendingBooking, AuthUser } from '../services/authService';
 export type { LocationSelection };
 
 interface BookingPageProps {
@@ -63,6 +68,10 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
   // Modal for managing user bookings
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  // 4K Café Interior Preview Modal
+  const [previewModalCafe, setPreviewModalCafe] = useState<CafeOption | null>(null);
 
   const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -72,8 +81,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       state: 'Telangana',
       city: 'Warangal',
       date: todayStr,
-      cafe: 'Celpin Heritage Café',
-      cafeDesk: 'Celpin Heritage Café'
+      cafe: 'Heritage Café',
+      cafeDesk: 'Heritage Café'
     }
   );
 
@@ -145,6 +154,28 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       setMonthlyStartDate(location.date);
     }
   }, [location.date]);
+
+  // Check for restored pending booking & authenticated user
+  useEffect(() => {
+    const pending = getPendingBooking();
+    if (pending) {
+      if (pending.step) setStep(pending.step as 1 | 2 | 3);
+      if (pending.zone) setSelectedZone(pending.zone as WorkspaceZone);
+      if (pending.bookingType) setBookingType(pending.bookingType as BookingDurationType);
+      if (pending.duration) setDuration(pending.duration);
+      if (pending.startTime) setStartTime(pending.startTime);
+      if (pending.cart) setCart(pending.cart);
+      if (pending.preferences) setPreferences(pending.preferences);
+      if (pending.paymentMethod) setPaymentMethod(pending.paymentMethod as "card" | "upi");
+      if (pending.location) setLocation(pending.location);
+    }
+
+    const u = getCurrentUser();
+    if (u) {
+      setCustomerName(u.name);
+      setCustomerEmail(u.email);
+    }
+  }, []);
 
   // Initial data loading
   useEffect(() => {
@@ -220,6 +251,16 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     cart,
     menuItems
   ]);
+
+  // Find next available alternative seat in same zone if current seat has conflict
+  const alternativeSeat = useMemo(() => {
+    if (!selectedSeat) return null;
+    return (
+      seats.find(s => s.zone === selectedSeat.zone && s.id !== selectedSeat.id && s.status === 'available') ||
+      seats.find(s => s.status === 'available' && s.id !== selectedSeat.id) ||
+      null
+    );
+  }, [seats, selectedSeat]);
 
   // Query server-side quote and live workspace availability whenever schedule or seat changes
   useEffect(() => {
@@ -318,32 +359,32 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       if (rawSeatCost > dailyCap) {
         discount = rawSeatCost - dailyCap;
         seatCost = dailyCap;
-        discountLabel = `Daily Cap Discount (Capped at ₹${dailyCap}/day)`;
+        discountLabel = `Session cap discount`;
       } else {
         discount = 0;
         seatCost = rawSeatCost;
         discountLabel = '';
       }
-      basePlanLabel = `Hourly Pass (₹${hourlyRate} / hr)`;
-      scheduleUnitsLabel = `${duration} Hour${duration > 1 ? 's' : ''} (${startTime})`;
+      basePlanLabel = `Hourly pass (₹${hourlyRate}/hr)`;
+      scheduleUnitsLabel = `${duration} hour${duration > 1 ? 's' : ''} (${startTime})`;
     } else if (bookingType === 'weekly') {
       const dailyRate = zoneRate.daily;
       const daysCount = weeklyTermCount * 7;
       rawSeatCost = daysCount * dailyRate;
       discount = Math.round(rawSeatCost * 0.15); // 15% membership discount
       seatCost = rawSeatCost - discount;
-      discountLabel = `15% Weekly Membership Savings`;
-      basePlanLabel = `Weekly Pass (₹${dailyRate * 7} / wk · ₹${dailyRate}/day)`;
-      scheduleUnitsLabel = `${weeklyTermCount} Week${weeklyTermCount > 1 ? 's' : ''} (${daysCount} Days)`;
+      discountLabel = `15% weekly membership savings`;
+      basePlanLabel = `Weekly pass (₹${dailyRate * 7}/wk)`;
+      scheduleUnitsLabel = `${weeklyTermCount} week${weeklyTermCount > 1 ? 's' : ''}`;
     } else if (bookingType === 'monthly') {
       const dailyRate = zoneRate.daily;
       const daysCount = monthlyTermCount * 30;
       rawSeatCost = daysCount * dailyRate;
       discount = Math.round(rawSeatCost * 0.25); // 25% premier loyalty discount
       seatCost = rawSeatCost - discount;
-      discountLabel = `25% Monthly Dedicated Savings`;
-      basePlanLabel = `Monthly Pass (₹${dailyRate * 30} / mo · ₹${dailyRate}/day)`;
-      scheduleUnitsLabel = `${monthlyTermCount} Month${monthlyTermCount > 1 ? 's' : ''} (${daysCount} Days)`;
+      discountLabel = `25% monthly dedicated savings`;
+      basePlanLabel = `Monthly pass (₹${dailyRate * 30}/mo)`;
+      scheduleUnitsLabel = `${monthlyTermCount} month${monthlyTermCount > 1 ? 's' : ''}`;
     }
 
     // If serverQuote matches current bookingType and duration, reflect server-verified quote
@@ -392,13 +433,39 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   const displayDiscountLabel = computedPricing.discountLabel;
   const displayGrandTotal = computedPricing.totalCost;
 
-  // Confirm and Generate Pass
+  // Confirm and Generate Pass with Mandatory Sign-In Requirement
   const handleConfirmBooking = async () => {
     if (!selectedSeat) return;
-    if (availability && !availability.available) {
-      setSubmissionError('Cannot proceed: The chosen seat has conflicting dates. Please select an available schedule.');
+
+    // Check if user is currently signed in
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      // Preserve all entered booking details before prompting sign-in
+      savePendingBooking({
+        seatId: selectedSeat.id,
+        zone: selectedZone,
+        bookingType,
+        startDate: currentScheduleParams.startDate,
+        endDate: currentScheduleParams.endDate,
+        startTime,
+        duration,
+        termCount: currentScheduleParams.termCount,
+        preferences,
+        cart,
+        location,
+        step: 3,
+        paymentMethod
+      });
+      setIsAuthModalOpen(true);
       return;
     }
+
+    // Signed-in user continues directly to confirmation
+    executeConfirmedBooking(currentUser);
+  };
+
+  const executeConfirmedBooking = async (user: AuthUser) => {
+    if (!selectedSeat) return;
 
     setIsSubmitting(true);
     setSubmissionError(null);
@@ -431,11 +498,12 @@ export const BookingPage: React.FC<BookingPageProps> = ({
         discount: displayDiscount,
         totalCost: displayGrandTotal,
         orderItems,
-        customerName,
-        customerEmail
+        customerName: user.name,
+        customerEmail: user.email
       });
 
       setBookingResult(res.booking);
+      clearPendingBooking();
 
       // Trigger Booking, Payment, and Access notifications
       sendNotification('booking_confirmed', {
@@ -451,10 +519,42 @@ export const BookingPage: React.FC<BookingPageProps> = ({
         'Space Name': spaceName
       });
     } catch (err: any) {
+      if (err.message && err.message.toLowerCase().includes("authentication required")) {
+        setIsAuthModalOpen(true);
+      }
       setSubmissionError(err.message || 'Failed to complete booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleAuthSuccess = (authenticatedUser: AuthUser) => {
+    setIsAuthModalOpen(false);
+    setCustomerName(authenticatedUser.name);
+    setCustomerEmail(authenticatedUser.email);
+    // Proceed directly with confirmation after sign-in
+    executeConfirmedBooking(authenticatedUser);
+  };
+
+  const handleNavigateToRegister = () => {
+    if (selectedSeat) {
+      savePendingBooking({
+        seatId: selectedSeat.id,
+        zone: selectedZone,
+        bookingType,
+        startDate: currentScheduleParams.startDate,
+        endDate: currentScheduleParams.endDate,
+        startTime,
+        duration,
+        termCount: currentScheduleParams.termCount,
+        preferences,
+        cart,
+        location,
+        step: 3,
+        paymentMethod
+      });
+    }
+    onNavigate('register');
   };
 
   const zonesList = [
@@ -506,7 +606,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
-            {t('booking.title', 'Book Your Workspace')}
+            {t('booking.title', 'Book your workspace')}
           </h1>
           <p className="mt-2 text-muted-foreground">
             {t('booking.subtitle', 'Pick a seat, select flexible hourly or multi-day durations, and generate your digital pass.')}
@@ -566,7 +666,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 step >= 2 ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
-              {t('booking.step2', 'Duration & Schedule')}
+              {t('booking.step2', 'Duration & schedule')}
             </span>
           </div>
           <div className={`flex-1 h-0.5 rounded-full transition-colors ${step >= 3 ? 'bg-primary' : 'bg-border'}`}></div>
@@ -585,7 +685,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 step >= 3 ? 'text-foreground' : 'text-muted-foreground'
               }`}
             >
-              {t('booking.step3', 'Digital Pass')}
+              {t('booking.step3', 'Digital pass')}
             </span>
           </div>
         </div>
@@ -599,21 +699,16 @@ export const BookingPage: React.FC<BookingPageProps> = ({
             <div className="space-y-6 animate-in fade-in duration-200">
               <LocationSelectorBar value={location} onChange={sel => setLocation(sel)} />
 
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-card border border-border shadow-xs">
-                <div>
-                  <span className="text-[11px] uppercase font-bold tracking-wider text-primary">Selected Café</span>
-                  <h3 className="text-base font-bold text-foreground">
-                    {location.cafe || location.cafeDesk || 'Celpin Heritage Café'}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    {location.city}, {location.state} • {location.date}
-                  </p>
-                </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-semibold self-start sm:self-auto">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  Real-Time Desks Available
-                </div>
-              </div>
+              {/* 4K Interior Preview Modal in Booking Page */}
+              <CafeInteriorPreviewModal
+                cafe={previewModalCafe}
+                isOpen={!!previewModalCafe}
+                onClose={() => setPreviewModalCafe(null)}
+                onSelectCafe={(cafeName) => {
+                  setLocation(prev => ({ ...prev, cafe: cafeName, cafeDesk: cafeName }));
+                  setPreviewModalCafe(null);
+                }}
+              />
 
               <div>
                 <h2 className="text-xl font-semibold mb-1">{t('booking.selectWorkspace', 'Select your workspace')}</h2>
@@ -707,7 +802,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-200">
               <div>
-                <h2 className="text-xl font-semibold mb-1">Select Booking Duration &amp; Schedule</h2>
+                <h2 className="text-xl font-semibold mb-1">Select booking duration &amp; schedule</h2>
                 <p className="text-sm text-muted-foreground">
                   Choose between hourly sessions, weekly membership passes, or monthly dedicated executive passes.
                 </p>
@@ -719,21 +814,21 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   {
                     id: 'hourly' as const,
                     label: 'Hourly',
-                    sub: '1–8 Hours Flexible',
-                    badge: 'Single Day',
+                    sub: '1–8 hours flexible',
+                    badge: 'Hourly',
                     icon: <Clock className="w-4 h-4" />
                   },
                   {
                     id: 'weekly' as const,
                     label: 'Weekly',
-                    sub: '7 Days Pass',
+                    sub: 'Weekly pass',
                     badge: 'Save 15%',
                     icon: <CalendarRange className="w-4 h-4" />
                   },
                   {
                     id: 'monthly' as const,
                     label: 'Monthly',
-                    sub: 'Dedicated 30d',
+                    sub: 'Dedicated monthly',
                     badge: 'Save 25%',
                     icon: <CalendarDays className="w-4 h-4" />
                   }
@@ -774,7 +869,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-border/60">
                       <div>
-                        <h3 className="font-bold text-sm text-foreground">Hourly Session Details</h3>
+                        <h3 className="font-bold text-sm text-foreground">Hourly session details</h3>
                         <p className="text-xs text-muted-foreground">Select session date, start time, and hours</p>
                       </div>
                       <span className="text-xl font-bold font-display text-primary">
@@ -840,7 +935,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                       <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
                         <span>
-                          <strong>Daily Cap Protected!</strong> Raw session cost of ₹{duration * zoneRate.hourly} is capped at ₹{zoneRate.daily}/day.
+                          <strong>Daily cap protected!</strong> Raw session cost of ₹{duration * zoneRate.hourly} is capped at maximum ₹{zoneRate.daily}.
                         </span>
                       </div>
                     )}
@@ -852,11 +947,11 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-border/60">
                       <div>
-                        <h3 className="font-bold text-sm text-foreground">Weekly Coworking Membership Pass</h3>
-                        <p className="text-xs text-muted-foreground">Full 7-day all-inclusive access per term week</p>
+                        <h3 className="font-bold text-sm text-foreground">Weekly coworking membership pass</h3>
+                        <p className="text-xs text-muted-foreground">Full weekly all-inclusive access</p>
                       </div>
                       <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20">
-                        15% Weekly Pass Discount
+                        15% weekly pass discount
                       </span>
                     </div>
 
@@ -885,7 +980,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                         >
                           {[1, 2, 3, 4, 8].map(w => (
                             <option key={w} value={w}>
-                              {w} Week{w > 1 ? 's' : ''} ({w * 7} Days Access)
+                              {w} week{w > 1 ? 's' : ''}
                             </option>
                           ))}
                         </select>
@@ -895,7 +990,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-center gap-2">
                       <Info className="w-4 h-4 text-primary shrink-0" />
                       <span>
-                        Standard 7-day all-inclusive pass per week. Partial weeks are pro-rated daily based on zone rate with 15% discount applied.
+                        Standard all-inclusive pass per week with 15% membership discount applied.
                       </span>
                     </div>
                   </div>
@@ -906,11 +1001,11 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   <div className="space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-border/60">
                       <div>
-                        <h3 className="font-bold text-sm text-foreground">Monthly Dedicated Executive Pass</h3>
-                        <p className="text-xs text-muted-foreground">Continuous 30-day dedicated desk pass with full perks</p>
+                        <h3 className="font-bold text-sm text-foreground">Monthly dedicated executive pass</h3>
+                        <p className="text-xs text-muted-foreground">Dedicated monthly desk pass with full perks</p>
                       </div>
                       <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                        25% Premier Loyalty Discount
+                        25% premier loyalty discount
                       </span>
                     </div>
 
@@ -939,7 +1034,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                         >
                           {[1, 2, 3, 6].map(m => (
                             <option key={m} value={m}>
-                              {m} Month{m > 1 ? 's' : ''} ({m * 30} Days Access)
+                              {m} month{m > 1 ? 's' : ''}
                             </option>
                           ))}
                         </select>
@@ -956,82 +1051,31 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 )}
               </div>
 
-              {/* REAL-TIME WORKSPACE AVAILABILITY SHIELD */}
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-primary" />
-                    <h3 className="font-bold text-sm text-foreground">Workspace Schedule Availability</h3>
-                  </div>
-
-                  {isVerifyingSchedule ? (
-                    <span className="text-xs text-muted-foreground animate-pulse">Verifying schedule...</span>
-                  ) : availability?.available ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold border border-emerald-500/20">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      Desk Verified Available ({availability.availableDatesCount} of {availability.requestedDatesCount} Days)
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 text-red-600 text-xs font-bold border border-red-500/20">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      Conflict Detected
-                    </span>
-                  )}
-                </div>
-
-                {/* Conflict Explanation Banner */}
-                {availability && !availability.available && (
-                  <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-xs space-y-2">
-                    <p className="font-bold flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4" />
-                      Seat {selectedSeat?.id} is unavailable for one or more dates:
-                    </p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      {availability.conflicts.map((c, i) => (
-                        <li key={i}>{c.reason}</li>
-                      ))}
-                    </ul>
-                    <p className="text-[11px] text-muted-foreground mt-2">
-                      Please adjust your date range, switch to another available seat, or choose different recurring weekdays.
-                    </p>
-                  </div>
-                )}
-
-                {/* Date Chips List with Holiday Markers */}
-                {serverQuote && serverQuote.dates && serverQuote.dates.length > 0 && (
-                  <div>
-                    <span className="text-xs font-semibold text-muted-foreground block mb-2">
-                      Selected Dates ({serverQuote.dates.length}):
-                    </span>
-                    <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
-                      {serverQuote.dateItems?.map(item => {
-                        const isDateAvailable = availability ? availability.dateAvailability[item.date] !== false : true;
-                        return (
-                          <span
-                            key={item.date}
-                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
-                              !isDateAvailable
-                                ? 'bg-red-500/15 text-red-600 border border-red-500/30 line-through'
-                                : item.isHoliday
-                                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30'
-                                : 'bg-muted/60 text-foreground border border-border/70'
-                            }`}
-                            title={item.holidayName || `${item.dayName} (${isDateAvailable ? 'Available' : 'Unavailable'})`}
-                          >
-                            <span>{item.date}</span>
-                            <span className="text-[10px] opacity-75">({item.dayName.slice(0, 3)})</span>
-                            {item.isHoliday && <span title={item.holidayName}>🏛️</span>}
-                          </span>
-                        );
-                      })}
+              {/* Real-time Availability Warning */}
+              {availability && !availability.available && (
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-2.5">
+                    <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-sm">Seat {selectedSeat?.name} is reserved at this time</p>
+                      <p className="mt-0.5 opacity-90">{availability.conflicts?.[0]?.reason || 'Another member has already reserved this slot.'}</p>
                     </div>
                   </div>
-                )}
-              </div>
+                  {alternativeSeat && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSeat(alternativeSeat)}
+                      className="px-3.5 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-xs shadow-xs hover:bg-primary/90 transition-all shrink-0 cursor-pointer"
+                    >
+                      Switch to {alternativeSeat.name} (Free)
+                    </button>
+                  )}
+                </div>
+              )}
 
               {/* Work Preferences Tags */}
               <div className="rounded-2xl border border-border bg-card p-6 shadow-xs">
-                <h3 className="font-semibold text-sm mb-1">Work Preferences</h3>
+                <h3 className="font-semibold text-sm mb-1">Work preferences</h3>
                 <p className="text-xs text-muted-foreground mb-4">Select all amenities needed for your session.</p>
 
                 <div className="flex flex-wrap gap-2">
@@ -1066,15 +1110,15 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-500/15 text-emerald-600 mb-4">
                     <Check className="h-8 w-8" />
                   </div>
-                  <h2 className="font-display text-2xl font-bold">Booking Confirmed!</h2>
+                  <h2 className="font-display text-2xl font-bold">Booking confirmed!</h2>
                   <p className="text-sm text-muted-foreground mt-1">
                     Your {bookingResult.bookingType} workspace pass is reserved. Show this pass at the entrance.
                   </p>
 
                   {/* Pass Box */}
                   <div className="mt-8 max-w-sm mx-auto p-6 rounded-2xl border border-border bg-card shadow-lg ring-1 ring-primary/20">
-                    <p className="text-xs uppercase font-semibold text-muted-foreground tracking-wider mb-2">
-                      Digital Turnstile Pass
+                    <p className="text-xs font-semibold text-muted-foreground mb-2">
+                      Digital turnstile pass
                     </p>
                     <div className="flex justify-center my-4">
                       <img
@@ -1167,7 +1211,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 /* Payment form */
                 <div className="rounded-2xl border border-border bg-card p-6 shadow-xs space-y-6">
                   <div>
-                    <h2 className="text-xl font-semibold mb-1">Pass Delivery &amp; Confirmation</h2>
+                    <h2 className="text-xl font-semibold mb-1">Pass delivery &amp; confirmation</h2>
                     <p className="text-sm text-muted-foreground">
                       Confirm member details and generate your encrypted entry pass.
                     </p>
@@ -1191,9 +1235,48 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   </div>
 
                   {submissionError && (
-                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 text-xs flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 shrink-0" />
-                      <span>{submissionError}</span>
+                    <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/25 text-red-700 dark:text-red-300 text-xs space-y-3">
+                      <div className="flex items-start gap-2.5">
+                        <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5 text-red-600 dark:text-red-400" />
+                        <div>
+                          <p className="font-semibold text-sm">Booking Reservation Notice</p>
+                          <p className="mt-0.5 leading-relaxed">{submissionError}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-red-500/15">
+                        {alternativeSeat && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedSeat(alternativeSeat);
+                              setSubmissionError(null);
+                            }}
+                            className="px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
+                          >
+                            Switch to Seat {alternativeSeat.name} ({alternativeSeat.zone})
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSubmissionError(null);
+                            setStep(2);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-card border border-border text-foreground hover:bg-muted text-xs font-medium cursor-pointer"
+                        >
+                          Change Time or Date
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSubmissionError(null);
+                            setStep(1);
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-card border border-border text-foreground hover:bg-muted text-xs font-medium cursor-pointer"
+                        >
+                          Pick Different Seat
+                        </button>
+                      </div>
                     </div>
                   )}
 
@@ -1276,18 +1359,24 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
         {/* Sticky Itemized Pricing Sidebar */}
         <div className="lg:col-span-1">
-          <div className="rounded-2xl border border-border bg-card shadow-sm sticky top-24 p-6 space-y-5">
-            <h3 className="font-semibold tracking-tight text-lg">{t('booking.summary', 'Booking Summary')}</h3>
+          <div className="rounded-2xl border border-border bg-card shadow-sm sticky top-24 p-6 space-y-4">
+            <h3 className="font-semibold tracking-tight text-lg">{t('booking.summary', 'Booking summary')}</h3>
+
+            {/* Selected Café in Booking Summary */}
+            <div className="flex justify-between items-start pb-2.5 border-b border-border/60 text-sm">
+              <span className="text-muted-foreground">Selected Café</span>
+              <div className="text-right">
+                <p className="font-semibold text-foreground text-sm">
+                  {location.cafe || location.cafeDesk || 'Heritage Café'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {location.city}, {location.state}
+                </p>
+              </div>
+            </div>
 
             {selectedSeat ? (
               <div className="space-y-3 text-sm">
-                <div className="flex justify-between items-center pb-2 border-b border-border/60">
-                  <span className="text-muted-foreground">Café Location</span>
-                  <span className="font-semibold text-foreground text-right text-xs max-w-[180px]">
-                    {location.city} • {location.cafe || location.cafeDesk}
-                  </span>
-                </div>
-
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
                   <span className="text-muted-foreground">Workspace</span>
                   <span className="font-bold text-foreground">
@@ -1344,7 +1433,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     >
                       {[1, 2, 3, 4, 8].map(w => (
                         <option key={w} value={w} className="bg-card text-foreground">
-                          {w} Week{w > 1 ? 's' : ''} ({w * 7}d)
+                          {w} week{w > 1 ? 's' : ''}
                         </option>
                       ))}
                     </select>
@@ -1357,7 +1446,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     >
                       {[1, 2, 3, 6].map(m => (
                         <option key={m} value={m} className="bg-card text-foreground">
-                          {m} Month{m > 1 ? 's' : ''} ({m * 30}d)
+                          {m} month{m > 1 ? 's' : ''}
                         </option>
                       ))}
                     </select>
@@ -1447,16 +1536,18 @@ export const BookingPage: React.FC<BookingPageProps> = ({
               <div className="pt-2 space-y-2">
                 {step < 3 ? (
                   <button
-                    disabled={Boolean(!selectedSeat || (step === 2 && availability && !availability.available))}
+                    disabled={!selectedSeat || (step === 2 && availability !== null && !availability.available)}
                     onClick={() => setStep((step + 1) as any)}
                     className="w-full inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl gap-1.5 shadow-sm disabled:opacity-50 disabled:pointer-events-none transition-colors cursor-pointer"
                   >
-                    Continue to {step === 1 ? 'Schedule' : 'Pass Confirmation'}
+                    {step === 2 && availability !== null && !availability.available
+                      ? 'Seat Unavailable — Change Time or Seat'
+                      : `Continue to ${step === 1 ? 'Schedule' : 'Pass Confirmation'}`}
                     <ArrowRight className="h-4 w-4 ml-1" />
                   </button>
                 ) : (
                   <button
-                    disabled={Boolean(isSubmitting || !selectedSeat || (availability && !availability.available))}
+                    disabled={Boolean(isSubmitting || !selectedSeat)}
                     onClick={handleConfirmBooking}
                     className="w-full inline-flex items-center justify-center font-semibold bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-xl gap-2 shadow-sm disabled:opacity-50 transition-colors cursor-pointer"
                   >
@@ -1487,6 +1578,21 @@ export const BookingPage: React.FC<BookingPageProps> = ({
           setBookingResult(null);
           setStep(1);
         }}
+      />
+      {/* Sign-In Required Modal before booking confirmation */}
+      <SignInRequiredModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+        bookingSummary={{
+          seatName: selectedSeat?.name,
+          zoneName: selectedZone.toUpperCase(),
+          durationText: `${duration} hrs (${bookingType})`,
+          totalAmount: displayGrandTotal,
+          bookingType: bookingType.toUpperCase(),
+          dateText: currentScheduleParams.startDate || location.date
+        }}
+        onNavigateToRegister={handleNavigateToRegister}
       />
     </div>
   );

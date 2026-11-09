@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Coffee,
   CupSoda,
@@ -14,11 +14,16 @@ import {
   Star,
   Sparkles,
   ShoppingBag,
-  ArrowRight
+  ArrowRight,
+  Eye,
+  MapPin,
+  Building2
 } from 'lucide-react';
 import { api } from '../services/api';
 import { MenuItem } from '../types';
 import { useI18n } from '../i18n/I18nContext';
+import { CITY_CAFES, CafeOption } from '../components/LocationSelectorBar';
+import { CafeInteriorPreviewModal } from '../components/CafeInteriorPreviewModal';
 
 interface CafePageProps {
   onNavigate: (page: string, params?: any) => void;
@@ -30,6 +35,21 @@ export const CafePage: React.FC<CafePageProps> = ({ onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [cart, setCart] = useState<Record<string, number>>({});
   const [addedNotice, setAddedNotice] = useState<string | null>(null);
+
+  // 4K Interior Preview State
+  const [previewCafe, setPreviewCafe] = useState<CafeOption | null>(null);
+  const [selectedCityFilter, setSelectedCityFilter] = useState<string>('All');
+
+  const allCafes = useMemo(() => {
+    return Object.entries(CITY_CAFES).flatMap(([city, cafes]) =>
+      cafes.map(c => ({ ...c, city }))
+    );
+  }, []);
+
+  const displayedCafes = useMemo(() => {
+    if (selectedCityFilter === 'All') return allCafes;
+    return allCafes.filter(c => c.city === selectedCityFilter);
+  }, [allCafes, selectedCityFilter]);
 
   useEffect(() => {
     api.getMenu().then(data => setItems(data.items));
@@ -199,6 +219,151 @@ export const CafePage: React.FC<CafePageProps> = ({ onNavigate }) => {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* 4K Interior Preview Modal */}
+      <CafeInteriorPreviewModal
+        cafe={previewCafe}
+        isOpen={!!previewCafe}
+        onClose={() => setPreviewCafe(null)}
+        onSelectCafe={(cafeName) => {
+          const found = allCafes.find(c => c.name === cafeName);
+          onNavigate('booking', {
+            initialLocation: {
+              country: 'India',
+              state: 'Telangana',
+              city: found?.city || 'Warangal',
+              cafe: cafeName,
+              cafeDesk: cafeName
+            }
+          });
+        }}
+      />
+
+      {/* Preview Every Listed Café's Interior Section */}
+      <div className="mt-16 pt-12 border-t border-border">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary border border-primary/20 mb-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Immersive 4K visuals</span>
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              Preview café interiors &amp; seating layouts
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-2xl leading-relaxed">
+              Explore high-resolution interior photos of every listed café before reserving. Check out lighting, ergonomic seating, quiet zones, and barista brew stations.
+            </p>
+          </div>
+
+          {/* City Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
+            {['All', 'Warangal', 'Hanamkonda', 'Kazipet', 'Hyderabad'].map((city) => (
+              <button
+                key={city}
+                type="button"
+                onClick={() => setSelectedCityFilter(city)}
+                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  selectedCityFilter === city
+                    ? 'bg-foreground text-background font-bold shadow-xs'
+                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground border border-border/60'
+                }`}
+              >
+                {city}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Cafés Preview Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {displayedCafes.map((cafe) => (
+            <div
+              key={cafe.id}
+              className="group rounded-2xl border border-border/80 bg-card overflow-hidden hover:border-primary/50 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+            >
+              {/* Photo & Overlay */}
+              <div className="relative aspect-16/10 overflow-hidden bg-muted">
+                <img
+                  src={cafe.coverPhoto || '/images/cafes/starbucks-interior.webp'}
+                  alt={cafe.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
+
+                <div className="absolute top-2.5 right-2.5">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[11px] font-bold text-white shadow-xs">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    {cafe.rating}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-white/90 drop-shadow-sm flex items-center gap-1">
+                    <MapPin className="h-3 w-3 text-primary shrink-0" />
+                    <span className="truncate">{cafe.area}</span>
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCafe(cafe)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-bold shadow-md hover:bg-primary/90 transition-all cursor-pointer shrink-0"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>Preview Interior</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Card Body */}
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h3 className="font-display font-bold text-base text-foreground leading-snug group-hover:text-primary transition-colors">
+                    {cafe.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                    {cafe.address}
+                  </p>
+
+                  <p className="text-[11px] text-muted-foreground leading-relaxed bg-muted/40 p-2 rounded-lg border border-border/50 mt-2.5 line-clamp-2">
+                    {cafe.atmosphereTag || 'Peaceful workspace ambiance with high-speed Wi-Fi and power outlets.'}
+                  </p>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-border/60 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreviewCafe(cafe)}
+                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    <span>View Seating &amp; Layout</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onNavigate('booking', {
+                        initialLocation: {
+                          country: 'India',
+                          state: 'Telangana',
+                          city: (cafe as any).city || 'Warangal',
+                          cafe: cafe.name,
+                          cafeDesk: cafe.name
+                        }
+                      });
+                    }}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-card border border-border hover:border-primary/50 text-foreground text-xs font-bold shadow-xs hover:shadow-sm transition-all cursor-pointer"
+                  >
+                    <span>Reserve</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

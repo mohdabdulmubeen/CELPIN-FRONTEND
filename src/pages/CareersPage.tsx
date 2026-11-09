@@ -138,7 +138,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
 
           {/* Page Title */}
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground text-balance">
-            Build Meaningful Spaces &amp; Tools With Us
+            Build meaningful spaces &amp; tools with us
           </h1>
 
           {/* Subtitle */}
@@ -150,7 +150,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
           <div className="mt-8 flex items-center justify-center">
             <span className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium bg-muted text-muted-foreground border border-border">
               <span className={`h-2 w-2 rounded-full ${openings.length > 0 ? 'bg-success animate-pulse' : 'bg-amber-500'}`} />
-              {openings.length > 0 ? `${openings.length} Active Openings` : 'Currently No Active Openings'}
+              {openings.length > 0 ? `${openings.length} active openings` : 'Currently no active openings'}
             </span>
           </div>
         </div>
@@ -168,7 +168,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
             </div>
 
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-              No Open Positions Right Now
+              No open positions right now
             </h2>
 
             <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
@@ -182,9 +182,9 @@ export const CareersPage: React.FC<CareersPageProps> = ({
                 <div>
                   <div className="flex items-center gap-2.5 text-primary font-semibold text-sm mb-2">
                     <Mail className="h-4 w-4" />
-                    <span>General Application</span>
+                    <span>General application</span>
                   </div>
-                  <h3 className="font-semibold text-foreground text-base">Introduce Yourself</h3>
+                  <h3 className="font-semibold text-foreground text-base">Introduce yourself</h3>
                   <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                     Tell us what you do best, what you love to build, and how you’d like to collaborate with us.
                   </p>
@@ -195,7 +195,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
                     onClick={() => handleOpenInterestModal()}
                     className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition cursor-pointer"
                   >
-                    <span>Submit General Interest</span>
+                    <span>Submit general interest</span>
                     <ArrowRight className="h-4 w-4" />
                   </button>
                 </div>
@@ -206,9 +206,9 @@ export const CareersPage: React.FC<CareersPageProps> = ({
                 <div>
                   <div className="flex items-center gap-2.5 text-primary font-semibold text-sm mb-2">
                     <Bell className="h-4 w-4" />
-                    <span>Future Openings</span>
+                    <span>Future openings</span>
                   </div>
-                  <h3 className="font-semibold text-foreground text-base">Stay in the Loop</h3>
+                  <h3 className="font-semibold text-foreground text-base">Stay in the loop</h3>
                   <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
                     Leave your email to receive an early notification as soon as new positions open up.
                   </p>
@@ -369,11 +369,11 @@ export const CareersPage: React.FC<CareersPageProps> = ({
         {/* Culture & Values Section (Valuable in both empty and populated states) */}
         <div className="mt-20 pt-16 border-t border-border">
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-              Our Principles
+            <span className="text-xs font-semibold text-primary">
+              Our principles
             </span>
             <h2 className="mt-2 font-display text-2xl sm:text-3xl font-bold text-foreground">
-              What We Value &amp; How We Work
+              What we value &amp; how we work
             </h2>
             <p className="mt-3 text-muted-foreground text-sm sm:text-base">
               Even as roles open and close, our core values guide how we collaborate, treat each other, and serve our community.
@@ -385,7 +385,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
                 <Zap className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-foreground text-base">Agency &amp; Ownership</h3>
+              <h3 className="font-semibold text-foreground text-base">Agency &amp; ownership</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 We believe in small, autonomous teams empowered to make decisions and solve real problems without needless bureaucracy.
               </p>
@@ -395,7 +395,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
                 <Heart className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-foreground text-base">Hospitality &amp; Care</h3>
+              <h3 className="font-semibold text-foreground text-base">Hospitality &amp; care</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 Every detail matters—from digital interactions to physical desk ergonomics, our focus is on genuine human comfort.
               </p>
@@ -415,7 +415,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary mb-4">
                 <Coffee className="h-5 w-5" />
               </div>
-              <h3 className="font-semibold text-foreground text-base">Sustainable Pace</h3>
+              <h3 className="font-semibold text-foreground text-base">Sustainable pace</h3>
               <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
                 High-quality creative thinking requires rest and space. We promote healthy working rhythms and long-term stamina.
               </p>
@@ -427,7 +427,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
         <div className="mt-20 pt-16 border-t border-border max-w-3xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="font-display text-2xl font-bold text-foreground">
-              Frequently Asked Questions
+              Frequently asked questions
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
               Common questions about career opportunities, speculative applications, and our culture.
@@ -494,7 +494,7 @@ export const CareersPage: React.FC<CareersPageProps> = ({
                   <CheckCircle2 className="h-8 w-8" />
                 </div>
                 <h3 className="font-display text-2xl font-bold text-foreground">
-                  Thank You for Reaching Out
+                  Thank you for reaching out
                 </h3>
                 <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
                   We have received your details. While we don’t have immediate openings, our team reviews incoming introductions regularly and will reach out if a matching opportunity emerges.

@@ -1,5 +1,5 @@
 import { getActiveSession, getCurrentUser } from './authService';
-import { Seat, ZoneInfo, MenuItem, Booking, UserProfile, RewardItem, ActivityLog } from '../types';
+import { Seat, ZoneInfo, MenuItem, Booking, UserProfile, RewardItem, ActivityLog, PricingQuote, AvailabilityResult } from '../types';
 
 const API_BASE = '/api';
 
@@ -68,6 +68,32 @@ export const api = {
     }
   },
 
+  async calculateQuote(data: any): Promise<{ quote: PricingQuote; availability?: AvailabilityResult }> {
+    const res = await fetch(`${API_BASE}/bookings/calculate-quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to calculate quote');
+    }
+    return await res.json();
+  },
+
+  async checkAvailability(data: any): Promise<AvailabilityResult> {
+    const res = await fetch(`${API_BASE}/bookings/check-availability`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to check seat availability');
+    }
+    return await res.json();
+  },
+
   async createBooking(data: any): Promise<{ booking: Booking }> {
     const session = getActiveSession();
     const user = getCurrentUser();
@@ -96,37 +122,96 @@ export const api = {
         headers,
         body: JSON.stringify(payload)
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Failed to create booking');
+      if (res.ok) {
+        const json = await res.json();
+        return json;
       }
-      return await res.json();
-    } catch {
-      const ref = `CEL-${Math.floor(100000 + Math.random() * 900000)}`;
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        throw new Error(err.error || 'Authentication required to confirm booking');
+      }
+      if (res.status === 400 || res.status === 409) {
+        throw new Error(err.message || err.error || 'Failed to create booking');
+      }
+      throw new Error(err.message || err.error || `Server error (${res.status})`);
+    } catch (networkOrServerError: any) {
+      if (networkOrServerError.message && !networkOrServerError.message.includes('Server error') && !networkOrServerError.message.includes('Failed to fetch') && !networkOrServerError.message.includes('NetworkError')) {
+        throw networkOrServerError;
+      }
+
+      console.warn('Backend unavailable, generating local confirmed pass:', networkOrServerError);
+      const todayStr = new Date().toISOString().split('T')[0];
+      const bookingRef = `CEL-${Math.floor(100000 + Math.random() * 900000)}`;
       const pin = `${Math.floor(1000 + Math.random() * 9000)}`;
-      return {
-        booking: {
-          id: `bkg_${Date.now()}`,
-          bookingRef: ref,
-          seatId: data.seatId,
-          zone: data.zone,
-          durationHours: data.duration,
-          preferences: data.preferences || [],
-          seatCost: data.seatCost || 120,
-          foodCost: data.foodCost || 0,
-          discount: data.discount || 0,
-          totalCost: data.totalCost || 120,
-          dailyCapApplied: (data.seatCost || 0) >= 399,
-          orderItems: data.orderItems || [],
-          pin,
-          qrCodeUrl: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=CELPIN-PASS:${ref}:${data.seatId}:${pin}`,
-          status: 'confirmed',
-          customerName: data.customerName || 'Guest Member',
-          customerEmail: data.customerEmail || 'member@celpin.cafe',
-          createdAt: new Date().toISOString()
-        }
+      const effectiveStartDate = payload.startDate || todayStr;
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(
+        `CELPIN-PASS:${bookingRef}:${payload.seatId || 'Q1'}:${effectiveStartDate}:${pin}`
+      )}`;
+
+      const fallbackBooking: Booking = {
+        id: `local_${Date.now()}`,
+        bookingRef,
+        seatId: (payload.seatId || 'Q1').toUpperCase(),
+        zone: payload.zone || 'quiet',
+        bookingType: payload.bookingType || 'hourly',
+        startDate: effectiveStartDate,
+        endDate: payload.endDate || effectiveStartDate,
+        startTime: payload.startTime || '09:00',
+        durationHours: Number(payload.duration) || 2,
+        dates: [effectiveStartDate],
+        recurrenceDays: payload.recurrenceDays || [],
+        termUnit: payload.bookingType === 'hourly' ? 'hours' : 'days',
+        termCount: Number(payload.termCount) || 1,
+        daysCount: 1,
+        preferences: payload.preferences || [],
+        seatCost: payload.seatCost || 0,
+        foodCost: payload.foodCost || 0,
+        discount: payload.discount || 0,
+        totalCost: payload.totalCost || (payload.seatCost + payload.foodCost - (payload.discount || 0)),
+        dailyCapApplied: false,
+        itemizedBreakdown: { summaryText: `${payload.duration || 2} hours session` },
+        pin,
+        qrCodeUrl,
+        status: 'confirmed',
+        customerName: payload.customerName,
+        customerEmail: payload.customerEmail,
+        orderItems: payload.orderItems || [],
+        createdAt: new Date().toISOString()
       };
+
+      try {
+        const stored = JSON.parse(localStorage.getItem('celpin_bookings') || '[]');
+        localStorage.setItem('celpin_bookings', JSON.stringify([fallbackBooking, ...stored]));
+      } catch {}
+
+      return { booking: fallbackBooking };
     }
+  },
+
+  async cancelBooking(id: string, reason?: string): Promise<{ message: string; refundTerms?: string; booking: Booking }> {
+    const res = await fetch(`${API_BASE}/bookings/${id}/cancel`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to cancel booking');
+    }
+    return await res.json();
+  },
+
+  async modifyBooking(id: string, data: any): Promise<{ message: string; booking: Booking }> {
+    const res = await fetch(`${API_BASE}/bookings/${id}/modify`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to modify booking');
+    }
+    return await res.json();
   },
 
   async getRewards(): Promise<{ profile: UserProfile; rewards: RewardItem[]; tiers: any[]; activity: ActivityLog[] }> {
@@ -184,10 +269,18 @@ export const api = {
   async getBookings(): Promise<{ bookings: any[] }> {
     try {
       const res = await fetch(`${API_BASE}/bookings`);
-      if (!res.ok) throw new Error('Failed to fetch bookings');
-      return await res.json();
+      const local = JSON.parse(localStorage.getItem('celpin_bookings') || '[]');
+      if (res.ok) {
+        const data = await res.json();
+        const serverBookings = data.bookings || [];
+        const seenRefs = new Set(serverBookings.map((b: any) => b.bookingRef));
+        const extraLocal = local.filter((b: any) => !seenRefs.has(b.bookingRef));
+        return { bookings: [...serverBookings, ...extraLocal] };
+      }
+      return { bookings: local };
     } catch {
-      return { bookings: [] };
+      const local = JSON.parse(localStorage.getItem('celpin_bookings') || '[]');
+      return { bookings: local };
     }
   },
 
