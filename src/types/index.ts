@@ -1,5 +1,5 @@
 export type WorkspaceZone = 'quiet' | 'collaboration' | 'window' | 'premium';
-export type BookingDurationType = 'hourly' | 'alternate' | 'weekly' | 'monthly';
+export type BookingDurationType = 'hourly' | 'alternate' | 'weekly' | 'monthly' | 'custom';
 
 export interface DateItem {
   date: string;

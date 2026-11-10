@@ -16,6 +16,8 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { CafeInteriorPreviewModal } from './CafeInteriorPreviewModal';
+import { DateRangePicker } from './DateRangePicker';
+import { getDaysDifference } from '../utils/dateUtils';
 
 export interface CafePhoto {
   url: string;
@@ -1038,6 +1040,7 @@ export interface LocationSelection {
   state: string;
   city: string;
   date: string;
+  endDate?: string;
   cafe?: string;
   cafeDesk?: string;
 }
@@ -1065,12 +1068,14 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
   const currentState = value?.state || initialValues?.state || 'Telangana';
   const currentCity = value?.city || initialValues?.city || 'Warangal';
   const currentDate = value?.date || initialValues?.date || todayStr;
+  const currentEndDate = value?.endDate || initialValues?.endDate || currentDate;
   const initialCafe = value?.cafe || value?.cafeDesk || initialValues?.cafe || initialValues?.cafeDesk || getCafesForCity(currentCity)[0]?.name || 'Heritage Café';
 
   const [country, setCountry] = useState<string>(currentCountry);
   const [state, setState] = useState<string>(currentState);
   const [city, setCity] = useState<string>(currentCity);
   const [date, setDate] = useState<string>(currentDate);
+  const [endDate, setEndDate] = useState<string>(currentEndDate);
   const [selectedCafe, setSelectedCafe] = useState<string>(initialCafe);
 
   // 4K Interior Preview Modal State
@@ -1105,6 +1110,7 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
       if (value.state) setState(value.state);
       if (value.city) setCity(value.city);
       if (value.date) setDate(value.date);
+      if (value.endDate) setEndDate(value.endDate);
       if (value.cafe) setSelectedCafe(value.cafe);
       else if (value.cafeDesk) setSelectedCafe(value.cafeDesk);
     }
@@ -1213,6 +1219,23 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
       state,
       city,
       date: newDate,
+      endDate: endDate || newDate,
+      cafe: selectedCafe,
+      cafeDesk: selectedCafe
+    };
+    if (onChange) onChange(newSelection);
+    if (onSelect) onSelect(newSelection);
+  };
+
+  const handleRangeChange = (range: { startDate: string; endDate: string; daysCount: number }) => {
+    setDate(range.startDate);
+    setEndDate(range.endDate);
+    const newSelection: LocationSelection = {
+      country,
+      state,
+      city,
+      date: range.startDate,
+      endDate: range.endDate,
       cafe: selectedCafe,
       cafeDesk: selectedCafe
     };
@@ -1227,6 +1250,7 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
       state,
       city,
       date,
+      endDate,
       cafe: cafeName,
       cafeDesk: cafeName
     };
@@ -1308,19 +1332,20 @@ export const LocationSelectorBar: React.FC<LocationSelectorBarProps> = ({
             </div>
           </div>
 
-          {/* Date */}
-          <div className="relative">
-            <label className="block text-[11px] font-semibold text-muted-foreground mb-1">Date</label>
-            <div className="relative">
-              <input
-                type="date"
-                min={todayStr}
-                value={date}
-                onChange={(e) => handleDateChange(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 rounded-xl border border-border/80 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-              />
-              <Calendar className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
-            </div>
+          {/* Date Range Picker */}
+          <div className="relative col-span-2 md:col-span-1">
+            <label className="block text-[11px] font-semibold text-muted-foreground mb-1">
+              Dates {date && endDate && `(${date === endDate ? '1 Day' : `${getDaysDifference(date, endDate)} Days`})`}
+            </label>
+            <DateRangePicker
+              startDate={date}
+              endDate={endDate || date}
+              onChange={handleRangeChange}
+              minDate={todayStr}
+              mode="range"
+              align="right"
+              buttonClassName="py-1.5 px-3 text-xs"
+            />
           </div>
         </div>
       </div>

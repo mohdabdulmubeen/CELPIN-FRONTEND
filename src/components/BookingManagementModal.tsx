@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Booking, BookingDurationType } from '../types';
+import { DateRangePicker } from './DateRangePicker';
+import { getTodayStr } from '../utils/dateUtils';
 
 interface BookingManagementModalProps {
   isOpen: boolean;
@@ -40,6 +42,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [rescheduleTarget, setRescheduleTarget] = useState<Booking | null>(null);
   const [newStartDate, setNewStartDate] = useState('');
+  const [newEndDate, setNewEndDate] = useState('');
   const [newStartTime, setNewStartTime] = useState('09:00');
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'confirmed' | 'checked-in' | 'cancelled'>('all');
@@ -89,6 +92,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
     try {
       await api.modifyBooking(rescheduleTarget.id, {
         startDate: newStartDate,
+        endDate: newEndDate || newStartDate,
         startTime: newStartTime
       });
       setRescheduleTarget(null);
@@ -583,13 +587,20 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="block font-semibold text-muted-foreground mb-1">Select New Start Date</label>
-                  <input
-                    type="date"
-                    min={new Date().toISOString().split('T')[0]}
-                    value={newStartDate}
-                    onChange={e => setNewStartDate(e.target.value)}
-                    className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground focus:ring-2 focus:ring-primary/20"
+                  <label className="block font-semibold text-muted-foreground mb-1.5">
+                    {rescheduleTarget.bookingType === 'hourly' ? 'Select New Date' : 'Select New Date Range'}
+                  </label>
+                  <DateRangePicker
+                    mode={rescheduleTarget.bookingType === 'hourly' ? 'single' : 'range'}
+                    startDate={newStartDate || getTodayStr()}
+                    endDate={newEndDate || newStartDate || getTodayStr()}
+                    minDate={getTodayStr()}
+                    onChange={range => {
+                      setNewStartDate(range.startDate);
+                      setNewEndDate(range.endDate);
+                    }}
+                    buttonClassName="w-full text-xs"
+                    align="center"
                   />
                 </div>
 

@@ -41,6 +41,15 @@ import { CafeInteriorPreviewModal } from '../components/CafeInteriorPreviewModal
 import { useI18n } from '../i18n/I18nContext';
 import { useNotifications } from '../context/NotificationContext';
 import { SignInRequiredModal } from '../components/SignInRequiredModal';
+import { DateRangePicker } from '../components/DateRangePicker';
+import { DateRangeCalendar } from '../components/DateRangeCalendar';
+import {
+  formatDisplayDate,
+  formatRangeSummary,
+  getDaysDifference,
+  addDays,
+  getTodayStr
+} from '../utils/dateUtils';
 import { getCurrentUser, getPendingBooking, clearPendingBooking, savePendingBooking, AuthUser } from '../services/authService';
 export type { LocationSelection };
 
@@ -101,12 +110,24 @@ export const BookingPage: React.FC<BookingPageProps> = ({
   const [duration, setDuration] = useState<number>(2);
   const [startTime, setStartTime] = useState<string>('09:00');
 
+  // Custom Range controls
+  const [customStartDate, setCustomStartDate] = useState<string>(location.date || todayStr);
+  const [customEndDate, setCustomEndDate] = useState<string>(
+    location.endDate || addDays(location.date || todayStr, 2)
+  );
+
   // Weekly controls
   const [weeklyStartDate, setWeeklyStartDate] = useState<string>(location.date || todayStr);
+  const [weeklyEndDate, setWeeklyEndDate] = useState<string>(
+    location.endDate || addDays(location.date || todayStr, 6)
+  );
   const [weeklyTermCount, setWeeklyTermCount] = useState<number>(1);
 
   // Monthly controls
   const [monthlyStartDate, setMonthlyStartDate] = useState<string>(location.date || todayStr);
+  const [monthlyEndDate, setMonthlyEndDate] = useState<string>(
+    location.endDate || addDays(location.date || todayStr, 29)
+  );
   const [monthlyTermCount, setMonthlyTermCount] = useState<number>(1);
 
   // Server Quote & Availability States
@@ -152,8 +173,18 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     if (location.date) {
       setWeeklyStartDate(location.date);
       setMonthlyStartDate(location.date);
+      setCustomStartDate(location.date);
+      if (location.endDate) {
+        setCustomEndDate(location.endDate);
+        setWeeklyEndDate(location.endDate);
+        setMonthlyEndDate(location.endDate);
+      } else {
+        setWeeklyEndDate(addDays(location.date, weeklyTermCount * 7 - 1));
+        setMonthlyEndDate(addDays(location.date, monthlyTermCount * 30 - 1));
+        setCustomEndDate(addDays(location.date, 2));
+      }
     }
-  }, [location.date]);
+  }, [location.date, location.endDate]);
 
   // Check for restored pending booking & authenticated user
   useEffect(() => {
@@ -208,12 +239,19 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
     if (bookingType === 'hourly') {
       startDate = location.date || todayStr;
+      endDate = startDate;
     } else if (bookingType === 'weekly') {
       startDate = weeklyStartDate;
+      endDate = weeklyEndDate;
       termCount = weeklyTermCount;
     } else if (bookingType === 'monthly') {
       startDate = monthlyStartDate;
+      endDate = monthlyEndDate;
       termCount = monthlyTermCount;
+    } else if (bookingType === 'custom') {
+      startDate = customStartDate;
+      endDate = customEndDate;
+      termCount = Math.max(1, getDaysDifference(customStartDate, customEndDate));
     }
 
     const orderItems = Object.entries(cart).map(([id, qty]) => {
@@ -243,9 +281,13 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     location.date,
     todayStr,
     weeklyStartDate,
+    weeklyEndDate,
     weeklyTermCount,
     monthlyStartDate,
+    monthlyEndDate,
     monthlyTermCount,
+    customStartDate,
+    customEndDate,
     startTime,
     duration,
     cart,
@@ -385,6 +427,23 @@ export const BookingPage: React.FC<BookingPageProps> = ({
       discountLabel = `25% monthly dedicated savings`;
       basePlanLabel = `Monthly pass (₹${dailyRate * 30}/mo)`;
       scheduleUnitsLabel = `${monthlyTermCount} month${monthlyTermCount > 1 ? 's' : ''}`;
+    } else if (bookingType === 'custom') {
+      const dailyRate = zoneRate.daily;
+      const daysCount = Math.max(1, getDaysDifference(customStartDate, customEndDate));
+      rawSeatCost = daysCount * dailyRate;
+      if (daysCount >= 30) {
+        discount = Math.round(rawSeatCost * 0.25);
+        discountLabel = '25% extended stay savings';
+      } else if (daysCount >= 7) {
+        discount = Math.round(rawSeatCost * 0.15);
+        discountLabel = '15% multi-day savings';
+      } else {
+        discount = 0;
+        discountLabel = '';
+      }
+      seatCost = rawSeatCost - discount;
+      basePlanLabel = `Custom pass (${daysCount} day${daysCount > 1 ? 's' : ''})`;
+      scheduleUnitsLabel = `${formatDisplayDate(customStartDate, { includeDayOfWeek: false, includeYear: false })} – ${formatDisplayDate(customEndDate, { includeDayOfWeek: false, includeYear: false })}`;
     }
 
     // If serverQuote matches current bookingType and duration, reflect server-verified quote
@@ -423,6 +482,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
     startTime,
     weeklyTermCount,
     monthlyTermCount,
+    customStartDate,
+    customEndDate,
     serverQuote,
     foodCost
   ]);
@@ -808,8 +869,8 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                 </p>
               </div>
 
-              {/* DURATION TYPE SELECTOR (3 TABS) */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* DURATION TYPE SELECTOR (4 TABS) */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
                   {
                     id: 'hourly' as const,
@@ -817,6 +878,13 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     sub: '1–8 hours flexible',
                     badge: 'Hourly',
                     icon: <Clock className="w-4 h-4" />
+                  },
+                  {
+                    id: 'custom' as const,
+                    label: 'Custom Range',
+                    sub: 'Pick any dates',
+                    badge: 'Flexible',
+                    icon: <Calendar className="w-4 h-4" />
                   },
                   {
                     id: 'weekly' as const,
@@ -882,12 +950,14 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                         <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
                           Booking Date
                         </label>
-                        <input
-                          type="date"
-                          min={todayStr}
-                          value={location.date || todayStr}
-                          onChange={e => setLocation(prev => ({ ...prev, date: e.target.value }))}
-                          className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
+                        <DateRangePicker
+                          mode="single"
+                          startDate={location.date || todayStr}
+                          minDate={todayStr}
+                          onChange={range => {
+                            setLocation(prev => ({ ...prev, date: range.startDate, endDate: range.startDate }));
+                          }}
+                          buttonClassName="py-2 text-sm"
                         />
                       </div>
 
@@ -942,7 +1012,50 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                   </div>
                 )}
 
-                {/* 2. WEEKLY CONFIG */}
+                {/* 2. CUSTOM RANGE CONFIG */}
+                {bookingType === 'custom' && (
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-border/60 gap-2">
+                      <div>
+                        <h3 className="font-bold text-sm text-foreground">Custom date-range pass</h3>
+                        <p className="text-xs text-muted-foreground">Select your exact check-in and check-out dates on the calendar</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                          {getDaysDifference(customStartDate, customEndDate)} Day{getDaysDifference(customStartDate, customEndDate) > 1 ? 's' : ''} Selected
+                        </span>
+                        {getDaysDifference(customStartDate, customEndDate) >= 7 && (
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                            {getDaysDifference(customStartDate, customEndDate) >= 30 ? '25% off' : '15% off'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <DateRangeCalendar
+                      startDate={customStartDate}
+                      endDate={customEndDate}
+                      minDate={todayStr}
+                      mode="range"
+                      showPresets={true}
+                      inline={true}
+                      onChange={range => {
+                        setCustomStartDate(range.startDate);
+                        setCustomEndDate(range.endDate);
+                      }}
+                      className="border border-border/80"
+                    />
+
+                    <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary shrink-0" />
+                      <span>
+                        Active range: <strong>{formatRangeSummary(customStartDate, customEndDate)}</strong>. Billed at flexible daily rate ₹{zoneRate.daily}/day with progressive discounts.
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. WEEKLY CONFIG */}
                 {bookingType === 'weekly' && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-border/60">
@@ -957,30 +1070,40 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                          Start Date
+                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
+                          Active Date Range
                         </label>
-                        <input
-                          type="date"
-                          min={todayStr}
-                          value={weeklyStartDate}
-                          onChange={e => setWeeklyStartDate(e.target.value)}
-                          className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
+                        <DateRangePicker
+                          startDate={weeklyStartDate}
+                          endDate={weeklyEndDate}
+                          minDate={todayStr}
+                          mode="range"
+                          onChange={range => {
+                            setWeeklyStartDate(range.startDate);
+                            setWeeklyEndDate(range.endDate);
+                            const weeks = Math.max(1, Math.round(range.daysCount / 7));
+                            setWeeklyTermCount(weeks);
+                          }}
+                          buttonClassName="py-2 text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
+                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
                           Booking Term (Weeks)
                         </label>
                         <select
                           value={weeklyTermCount}
-                          onChange={e => setWeeklyTermCount(Number(e.target.value))}
+                          onChange={e => {
+                            const count = Number(e.target.value);
+                            setWeeklyTermCount(count);
+                            setWeeklyEndDate(addDays(weeklyStartDate, count * 7 - 1));
+                          }}
                           className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
                         >
                           {[1, 2, 3, 4, 8].map(w => (
                             <option key={w} value={w}>
-                              {w} week{w > 1 ? 's' : ''}
+                              {w} week{w > 1 ? 's' : ''} ({w * 7} days)
                             </option>
                           ))}
                         </select>
@@ -990,7 +1113,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-center gap-2">
                       <Info className="w-4 h-4 text-primary shrink-0" />
                       <span>
-                        Standard all-inclusive pass per week with 15% membership discount applied.
+                        Active dates: <strong>{formatRangeSummary(weeklyStartDate, weeklyEndDate)}</strong> with 15% membership discount applied.
                       </span>
                     </div>
                   </div>
@@ -1011,30 +1134,40 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
-                          Start Date
+                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
+                          Active Date Range
                         </label>
-                        <input
-                          type="date"
-                          min={todayStr}
-                          value={monthlyStartDate}
-                          onChange={e => setMonthlyStartDate(e.target.value)}
-                          className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
+                        <DateRangePicker
+                          startDate={monthlyStartDate}
+                          endDate={monthlyEndDate}
+                          minDate={todayStr}
+                          mode="range"
+                          onChange={range => {
+                            setMonthlyStartDate(range.startDate);
+                            setMonthlyEndDate(range.endDate);
+                            const months = Math.max(1, Math.round(range.daysCount / 30));
+                            setMonthlyTermCount(months);
+                          }}
+                          buttonClassName="py-2 text-sm"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">
+                        <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1.5">
                           Booking Term (Months)
                         </label>
                         <select
                           value={monthlyTermCount}
-                          onChange={e => setMonthlyTermCount(Number(e.target.value))}
+                          onChange={e => {
+                            const count = Number(e.target.value);
+                            setMonthlyTermCount(count);
+                            setMonthlyEndDate(addDays(monthlyStartDate, count * 30 - 1));
+                          }}
                           className="w-full bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:ring-2 focus:ring-primary/20"
                         >
                           {[1, 2, 3, 6].map(m => (
                             <option key={m} value={m}>
-                              {m} month{m > 1 ? 's' : ''}
+                              {m} month{m > 1 ? 's' : ''} ({m * 30} days)
                             </option>
                           ))}
                         </select>
@@ -1044,7 +1177,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs text-muted-foreground flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-amber-500 shrink-0" />
                       <span>
-                        Includes unlimited high-speed fiber Wi-Fi, locker access, conference room credits, and 25% dedicated member discount.
+                        Active dates: <strong>{formatRangeSummary(monthlyStartDate, monthlyEndDate)}</strong> with 25% dedicated member discount.
                       </span>
                     </div>
                   </div>
@@ -1280,6 +1413,33 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     </div>
                   )}
 
+                  {/* Highlighted Chosen Date Range Review Card */}
+                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-900 dark:text-amber-200 shrink-0">
+                        <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">
+                          Selected Booking Dates
+                        </span>
+                        <p className="font-bold text-sm text-foreground">
+                          {formatRangeSummary(currentScheduleParams.startDate, currentScheduleParams.endDate || currentScheduleParams.startDate)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Check-in: {formatDisplayDate(currentScheduleParams.startDate)} ({startTime}) • Pass valid until {formatDisplayDate(currentScheduleParams.endDate || currentScheduleParams.startDate)} (11:59 PM)
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="self-start sm:self-auto px-3 py-1.5 rounded-lg border border-border bg-background hover:bg-muted text-xs font-semibold text-primary transition-colors cursor-pointer"
+                    >
+                      Change Dates
+                    </button>
+                  </div>
+
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div
                       onClick={() => setPaymentMethod('upi')}
@@ -1377,6 +1537,22 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
             {selectedSeat ? (
               <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-start pb-2 border-b border-border/60">
+                  <span className="text-muted-foreground">Date Range</span>
+                  <div className="text-right">
+                    <p className="font-semibold text-foreground text-xs">
+                      {formatRangeSummary(currentScheduleParams.startDate, currentScheduleParams.endDate || currentScheduleParams.startDate)}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="text-[10px] text-primary hover:underline font-medium cursor-pointer"
+                    >
+                      Change dates
+                    </button>
+                  </div>
+                </div>
+
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
                   <span className="text-muted-foreground">Workspace</span>
                   <span className="font-bold text-foreground">
@@ -1395,6 +1571,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2.5 py-1 text-xs font-bold text-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                   >
                     <option value="hourly" className="bg-card text-foreground">Hourly</option>
+                    <option value="custom" className="bg-card text-foreground">Custom Range</option>
                     <option value="weekly" className="bg-card text-foreground">Weekly</option>
                     <option value="monthly" className="bg-card text-foreground">Monthly</option>
                   </select>
@@ -1409,7 +1586,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
 
                 <div className="flex justify-between items-center pb-2 border-b border-border/60">
                   <label htmlFor="summary-duration-units" className="text-muted-foreground font-medium text-xs">
-                    {bookingType === 'hourly' ? 'Session Hours' : bookingType === 'weekly' ? 'Weekly Term' : 'Monthly Term'}
+                    {bookingType === 'hourly' ? 'Session Hours' : bookingType === 'custom' ? 'Days Selected' : bookingType === 'weekly' ? 'Weekly Term' : 'Monthly Term'}
                   </label>
                   {bookingType === 'hourly' ? (
                     <select
@@ -1424,11 +1601,19 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                         </option>
                       ))}
                     </select>
+                  ) : bookingType === 'custom' ? (
+                    <span className="text-xs font-bold text-primary">
+                      {getDaysDifference(customStartDate, customEndDate)} Days
+                    </span>
                   ) : bookingType === 'weekly' ? (
                     <select
                       id="summary-duration-units"
                       value={weeklyTermCount}
-                      onChange={(e) => setWeeklyTermCount(Number(e.target.value))}
+                      onChange={(e) => {
+                        const count = Number(e.target.value);
+                        setWeeklyTermCount(count);
+                        setWeeklyEndDate(addDays(weeklyStartDate, count * 7 - 1));
+                      }}
                       className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2 py-0.5 text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                     >
                       {[1, 2, 3, 4, 8].map(w => (
@@ -1441,7 +1626,11 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     <select
                       id="summary-duration-units"
                       value={monthlyTermCount}
-                      onChange={(e) => setMonthlyTermCount(Number(e.target.value))}
+                      onChange={(e) => {
+                        const count = Number(e.target.value);
+                        setMonthlyTermCount(count);
+                        setMonthlyEndDate(addDays(monthlyStartDate, count * 30 - 1));
+                      }}
                       className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2 py-0.5 text-xs font-bold text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                     >
                       {[1, 2, 3, 6].map(m => (
@@ -1511,6 +1700,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
                     className="bg-muted/70 hover:bg-muted border border-border rounded-lg px-2.5 py-1 text-xs font-bold text-primary focus:outline-hidden focus:ring-2 focus:ring-primary/20 cursor-pointer transition-colors"
                   >
                     <option value="hourly" className="bg-card text-foreground">Hourly</option>
+                    <option value="custom" className="bg-card text-foreground">Custom Range</option>
                     <option value="weekly" className="bg-card text-foreground">Weekly</option>
                     <option value="monthly" className="bg-card text-foreground">Monthly</option>
                   </select>
@@ -1590,7 +1780,7 @@ export const BookingPage: React.FC<BookingPageProps> = ({
           durationText: `${duration} hrs (${bookingType})`,
           totalAmount: displayGrandTotal,
           bookingType: bookingType.toUpperCase(),
-          dateText: currentScheduleParams.startDate || location.date
+          dateText: formatRangeSummary(currentScheduleParams.startDate, currentScheduleParams.endDate || currentScheduleParams.startDate)
         }}
         onNavigateToRegister={handleNavigateToRegister}
       />

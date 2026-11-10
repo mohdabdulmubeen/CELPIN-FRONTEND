@@ -17,6 +17,8 @@ import {
 import { api } from '../services/api';
 import { Seat, ZoneInfo } from '../types';
 import { useI18n } from '../i18n/I18nContext';
+import { DateRangePicker } from '../components/DateRangePicker';
+import { getTodayStr } from '../utils/dateUtils';
 
 interface FloorMapPageProps {
   onNavigate: (page: string, params?: any) => void;
@@ -28,6 +30,8 @@ export const FloorMapPage: React.FC<FloorMapPageProps> = ({ onNavigate }) => {
   const [, setZones] = useState<Record<string, ZoneInfo>>({});
   const [stats, setStats] = useState({ total: 15, available: 11, occupied: 3, reserved: 1 });
   const [selectedSeat, setSelectedSeat] = useState<Seat | null>(null);
+  const [startDate, setStartDate] = useState<string>(() => getTodayStr());
+  const [endDate, setEndDate] = useState<string>(() => getTodayStr());
 
   useEffect(() => {
     api.getSeats().then(data => {
@@ -231,10 +235,37 @@ export const FloorMapPage: React.FC<FloorMapPageProps> = ({ onNavigate }) => {
                   </ul>
                 </div>
 
+                <div>
+                  <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-1.5">Selected Dates</h4>
+                  <DateRangePicker
+                    startDate={startDate}
+                    endDate={endDate}
+                    minDate={getTodayStr()}
+                    mode="range"
+                    onChange={range => {
+                      setStartDate(range.startDate);
+                      setEndDate(range.endDate);
+                    }}
+                    buttonClassName="py-2 text-xs"
+                    align="right"
+                  />
+                </div>
+
                 <div className="pt-2">
                   <button
-                    onClick={() => onNavigate('booking', { selectedSeatId: selectedSeat.id, selectedZone: selectedSeat.zone })}
-                    className="w-full inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] h-11 rounded-xl gap-2 shadow-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    onClick={() => onNavigate('booking', {
+                      selectedSeatId: selectedSeat.id,
+                      selectedZone: selectedSeat.zone,
+                      location: {
+                        country: 'India',
+                        state: 'Telangana',
+                        city: 'Warangal',
+                        date: startDate,
+                        endDate: endDate,
+                        cafe: 'Heritage Café'
+                      }
+                    })}
+                    className="w-full inline-flex items-center justify-center font-medium bg-primary text-primary-foreground hover:bg-primary/90 min-h-[44px] h-11 rounded-xl gap-2 shadow-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer"
                   >
                     {t('floormap.bookSeat')} {selectedSeat.name} <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </button>
