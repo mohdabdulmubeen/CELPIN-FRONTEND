@@ -1,5 +1,6 @@
 import { getActiveSession, getCurrentUser } from './authService';
-import { Seat, ZoneInfo, MenuItem, Booking, UserProfile, RewardItem, ActivityLog, PricingQuote, AvailabilityResult } from '../types';
+import { Seat, ZoneInfo, MenuItem, Booking, PricingQuote, AvailabilityResult } from '../types';
+import { formatTimeSlotRange } from '../utils/dateUtils';
 
 const API_BASE = '/api';
 
@@ -148,6 +149,22 @@ export const api = {
         `CELPIN-PASS:${bookingRef}:${payload.seatId || 'Q1'}:${effectiveStartDate}:${pin}`
       )}`;
 
+      const daysCount = payload.bookingType === 'weekly'
+        ? 7
+        : payload.bookingType === 'monthly'
+        ? (Number(payload.termCount) || 1) * 30
+        : payload.bookingType === 'custom'
+        ? Number(payload.termCount) || 1
+        : 1;
+
+      const summaryText = payload.bookingType === 'weekly'
+        ? '1 Week (7 Days) Membership Pass'
+        : payload.bookingType === 'monthly'
+        ? `${payload.termCount || 1} Month Dedicated Pass`
+        : payload.bookingType === 'custom'
+        ? `${payload.termCount || 1} Days Custom Pass`
+        : `${payload.duration || 2} hours session (${formatTimeSlotRange(payload.startTime || '09:00', payload.duration || 2)})`;
+
       const fallbackBooking: Booking = {
         id: `local_${Date.now()}`,
         bookingRef,
@@ -162,14 +179,14 @@ export const api = {
         recurrenceDays: payload.recurrenceDays || [],
         termUnit: payload.bookingType === 'hourly' ? 'hours' : 'days',
         termCount: Number(payload.termCount) || 1,
-        daysCount: 1,
+        daysCount,
         preferences: payload.preferences || [],
         seatCost: payload.seatCost || 0,
         foodCost: payload.foodCost || 0,
         discount: payload.discount || 0,
         totalCost: payload.totalCost || (payload.seatCost + payload.foodCost - (payload.discount || 0)),
         dailyCapApplied: false,
-        itemizedBreakdown: { summaryText: `${payload.duration || 2} hours session` },
+        itemizedBreakdown: { summaryText },
         pin,
         qrCodeUrl,
         status: 'confirmed',
@@ -212,58 +229,6 @@ export const api = {
       throw new Error(err.error || 'Failed to modify booking');
     }
     return await res.json();
-  },
-
-  async getRewards(): Promise<{ profile: UserProfile; rewards: RewardItem[]; tiers: any[]; activity: ActivityLog[] }> {
-    try {
-      const res = await fetch(`${API_BASE}/rewards`);
-      if (!res.ok) throw new Error('Failed to fetch rewards');
-      return await res.json();
-    } catch {
-      return {
-        profile: {
-          credits: 320,
-          hoursBooked: 47,
-          totalSaved: 1200,
-          freeCoffeesReady: 2,
-          currentTier: 'Gold',
-          lifetimePoints: 820,
-          nextTierPoints: 1000
-        },
-        rewards: [
-          { id: 'free-hour', name: 'Dedicated Focus Session', description: 'Redeem for an extended workspace session', creditCost: 150, icon: 'clock' },
-          { id: 'free-cappuccino', name: 'Free Cappuccino', description: 'A fresh cappuccino, on the house', creditCost: 50, icon: 'coffee' },
-          { id: 'discount-100', name: 'Priority Pass Upgrade', description: 'Instant upgrade to executive cabin', creditCost: 200, icon: 'gift' },
-          { id: 'free-premium-hour', name: 'Executive Suite Access', description: 'Access to our premium ergonomic suite', creditCost: 250, icon: 'crown' }
-        ],
-        tiers: [
-          { name: 'Bronze', pointsRequired: 0, icon: 'star', perks: ['1 credit per booking session', 'Access to all zones'] },
-          { name: 'Silver', pointsRequired: 500, icon: 'zap', perks: ['1.5 credits per session', 'Complimentary café upgrades', 'Priority seat notifications'] },
-          { name: 'Gold', pointsRequired: 1000, icon: 'crown', perks: ['2 credits per session', 'Priority café perks', 'Complimentary beverage every 10 visits', 'Early access to premium pods'] },
-          { name: 'Platinum', pointsRequired: 2500, icon: 'award', perks: ['3 credits per session', 'Priority access across all zones', 'Guaranteed seat reservation', 'Unlimited quiet pod reservations'] }
-        ],
-        activity: [
-          { id: 'act-1', type: 'earned', title: 'Earned credits', credits: 40, description: '3h at Window Seat W3', date: 'Aug 20' },
-          { id: 'act-2', type: 'redeemed', title: 'Redeemed reward', credits: -50, description: 'Free Cappuccino', date: 'Aug 18' },
-          { id: 'act-3', type: 'earned', title: 'Earned credits', credits: 60, description: '4h at Premium Desk P1', date: 'Aug 15' },
-          { id: 'act-4', type: 'bonus', title: 'Bonus credits', credits: 30, description: 'Gold tier bonus', date: 'Aug 12' },
-          { id: 'act-5', type: 'earned', title: 'Earned credits', credits: 24, description: '2h at Quiet Zone Q1', date: 'Aug 10' }
-        ]
-      };
-    }
-  },
-
-  async redeemReward(rewardId: string): Promise<{ message: string }> {
-    try {
-      const res = await fetch(`${API_BASE}/rewards/redeem`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rewardId })
-      });
-      return await res.json();
-    } catch {
-      return { message: 'Reward redeemed successfully!' };
-    }
   },
 
   async getBookings(): Promise<{ bookings: any[] }> {
@@ -327,7 +292,7 @@ export const api = {
       return await res.json();
     } catch {
       return {
-        reply: "Celpin blends flexible co-working with artisanal café comfort! You can choose your preferred zone from the interactive floor map, request desk amenities, and check in instantly with a quick QR scan."
+        reply: "Celpin blends flexible co-working with artisanal cafe comfort! You can choose your preferred zone from the interactive floor map, request desk amenities, and check in instantly with a quick QR scan."
       };
     }
   }

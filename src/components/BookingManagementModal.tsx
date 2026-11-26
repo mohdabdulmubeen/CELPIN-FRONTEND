@@ -18,7 +18,7 @@ import {
 import { api } from '../services/api';
 import { Booking, BookingDurationType } from '../types';
 import { DateRangePicker } from './DateRangePicker';
-import { getTodayStr } from '../utils/dateUtils';
+import { getTodayStr, addDays, getConsecutiveTimeSlots, formatTimeSlotRange } from '../utils/dateUtils';
 
 interface BookingManagementModalProps {
   isOpen: boolean;
@@ -119,13 +119,13 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
         );
       case 'weekly':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-            <CalendarRange className="w-3 h-3" /> Weekly Pass
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tan-500/15 text-tan-700 dark:text-tan-300 border border-tan-500/30">
+            <CalendarRange className="w-3 h-3 text-primary" /> Weekly Pass
           </span>
         );
       case 'monthly':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
             <CalendarDays className="w-3 h-3" /> Monthly Pass
           </span>
         );
@@ -305,7 +305,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                         <span className="text-muted-foreground block mb-0.5">Duration &amp; Days:</span>
                         <span className="font-semibold text-foreground">
                           {booking.bookingType === 'hourly'
-                            ? `${booking.durationHours} Hours (${booking.startTime || '09:00'})`
+                            ? `${booking.durationHours} Hours (${formatTimeSlotRange(booking.startTime, booking.durationHours)})`
                             : `${datesList.length || booking.daysCount || 1} Days`}
                         </span>
                         {recurrenceDays.length > 0 && (
@@ -374,6 +374,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                                 setRescheduleTarget(booking);
                                 setNewStartDate(booking.startDate || new Date().toISOString().split('T')[0]);
                                 setNewStartTime(booking.startTime || '09:00');
+                                setNewEndDate(booking.endDate || booking.startDate || new Date().toISOString().split('T')[0]);
                                 setRescheduleError(null);
                               }}
                               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-border bg-background hover:bg-muted text-foreground text-xs font-medium cursor-pointer"
@@ -421,7 +422,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
         {/* VIEW PASS MODAL */}
         {selectedBooking && (
           <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-in fade-in">
-            <div className="relative w-full max-w-sm bg-card border border-border rounded-2xl shadow-2xl p-6 text-center space-y-4">
+            <div className="relative w-full max-w-sm bg-gradient-to-b from-[#FFF5EE] via-[#FFF1E8] to-[#FFEAE0] dark:from-[#2B1B14] dark:via-[#261812] dark:to-[#1F130E] border border-[#F6D3C2] dark:border-[#523326] ring-1 ring-[#F4BFA8]/60 dark:ring-[#754432]/40 rounded-3xl shadow-2xl p-6 text-center space-y-4 overflow-hidden">
               <button
                 onClick={() => setSelectedBooking(null)}
                 className="absolute top-4 right-4 p-1.5 rounded-xl text-muted-foreground hover:text-foreground cursor-pointer"
@@ -429,7 +430,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                 <X className="w-4 h-4" />
               </button>
 
-              <div className="inline-flex p-3 rounded-full bg-primary/10 text-primary">
+              <div className="inline-flex p-3 rounded-full bg-[#FFE6D9] text-[#B85324] dark:bg-[#3D251A] dark:text-[#FFA37A]">
                 <QrCode className="w-8 h-8" />
               </div>
               <div>
@@ -437,20 +438,20 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                 <p className="text-xs text-muted-foreground">Scan at optical scanner or enter 4-digit PIN</p>
               </div>
 
-              <div className="p-4 rounded-xl border border-border bg-white flex justify-center">
+              <div className="p-3.5 rounded-2xl border border-[#F2C9B6]/60 bg-white flex justify-center shadow-xs">
                 <img
                   src={selectedBooking.qrCodeUrl}
                   alt="QR Code"
-                  className="w-48 h-48 rounded-lg"
+                  className="w-44 h-44 rounded-lg"
                 />
               </div>
 
-              <div className="bg-muted/40 p-3 rounded-xl space-y-1">
+              <div className="bg-white/70 dark:bg-black/30 border border-[#F1CBB9]/70 dark:border-[#4B2F23] p-3 rounded-2xl space-y-1">
                 <span className="text-[11px] text-muted-foreground uppercase font-semibold">Entry PIN code</span>
-                <p className="font-mono text-2xl font-black text-primary tracking-widest">{selectedBooking.pin}</p>
+                <p className="font-mono text-2xl font-black text-[#D35400] dark:text-[#FF8A50] tracking-widest">{selectedBooking.pin}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 text-left text-xs pt-2 border-t border-border">
+              <div className="grid grid-cols-2 gap-2 text-left text-xs pt-2 border-t border-[#F1CBB9]/80 dark:border-[#4B2F23]">
                 <div>
                   <span className="text-muted-foreground">Seat:</span>
                   <p className="font-bold">{selectedBooking.seatId} ({selectedBooking.zone})</p>
@@ -511,7 +512,7 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                 </div>
               ) : (
                 <>
-                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs space-y-1">
+                  <div className="p-3.5 rounded-xl bg-primary/10 border border-primary/20 text-foreground text-xs space-y-1">
                     <p className="font-semibold">Cancellation Policy &amp; Terms:</p>
                     <ul className="list-disc pl-4 space-y-0.5 text-[11px]">
                       <li>24+ hours before start time: <strong>100% full credit refund</strong> to your Celpin account.</li>
@@ -591,9 +592,21 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
                     {rescheduleTarget.bookingType === 'hourly' ? 'Select New Date' : 'Select New Date Range'}
                   </label>
                   <DateRangePicker
-                    mode={rescheduleTarget.bookingType === 'hourly' ? 'single' : 'range'}
+                    mode={
+                      rescheduleTarget.bookingType === 'hourly'
+                        ? 'single'
+                        : rescheduleTarget.bookingType === 'weekly'
+                        ? 'weekly'
+                        : rescheduleTarget.bookingType === 'custom'
+                        ? 'custom'
+                        : 'range'
+                    }
                     startDate={newStartDate || getTodayStr()}
-                    endDate={newEndDate || newStartDate || getTodayStr()}
+                    endDate={
+                      rescheduleTarget.bookingType === 'weekly'
+                        ? addDays(newStartDate || getTodayStr(), 6)
+                        : newEndDate || newStartDate || getTodayStr()
+                    }
                     minDate={getTodayStr()}
                     onChange={range => {
                       setNewStartDate(range.startDate);
@@ -606,14 +619,18 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
 
                 {rescheduleTarget.bookingType === 'hourly' && (
                   <div>
-                    <label className="block font-semibold text-muted-foreground mb-1">Start Time</label>
+                    <label className="block font-semibold text-muted-foreground mb-1">
+                      Select Time Slot ({rescheduleTarget.durationHours || 2} hrs)
+                    </label>
                     <select
                       value={newStartTime}
                       onChange={e => setNewStartTime(e.target.value)}
-                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground"
+                      className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs text-foreground cursor-pointer font-medium"
                     >
-                      {['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map(t => (
-                        <option key={t} value={t}>{t}</option>
+                      {getConsecutiveTimeSlots(rescheduleTarget.durationHours || 2).map(s => (
+                        <option key={s.startTime} value={s.startTime}>
+                          {s.label} ({s.shortLabel})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -648,4 +665,3 @@ export const BookingManagementModal: React.FC<BookingManagementModalProps> = ({
     </div>
   );
 };
-

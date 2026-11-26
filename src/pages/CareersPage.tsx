@@ -703,4 +703,3 @@ export const CareersPage: React.FC<CareersPageProps> = ({
 };
 
 export default CareersPage;
-

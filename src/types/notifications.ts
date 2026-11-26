@@ -40,4 +40,3 @@ export interface NotificationItem {
   actionTarget?: string;
   params?: Record<string, string>;
 }
-

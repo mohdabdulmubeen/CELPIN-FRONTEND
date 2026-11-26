@@ -16,7 +16,7 @@ export interface DateRangePickerProps {
   onChange: (range: DateRangeValue) => void;
   minDate?: string;
   maxDate?: string;
-  mode?: 'range' | 'single';
+  mode?: 'range' | 'single' | 'weekly' | 'custom';
   showPresets?: boolean;
   highlightedDates?: string[];
   unavailableDates?: string[];
@@ -27,6 +27,7 @@ export interface DateRangePickerProps {
   inline?: boolean;
   disabled?: boolean;
   align?: 'left' | 'right' | 'center';
+  compact?: boolean;
 }
 
 export const DateRangePicker: React.FC<DateRangePickerProps> = ({
@@ -42,10 +43,11 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
   className = '',
   buttonClassName = '',
   label,
-  placeholder = 'Select dates',
+  placeholder = 'Select Dates',
   inline = false,
   disabled = false,
-  align = 'left'
+  align = 'left',
+  compact = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -102,24 +104,33 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
     };
   }, [isOpen]);
 
-  const daysCount = getDaysDifference(startDate, endDate);
+  const daysCount = mode === 'weekly' ? 7 : getDaysDifference(startDate, endDate);
+
+  const formattedStart = startDate ? formatDisplayDate(startDate, { includeDayOfWeek: false, includeYear: false }) : '';
+  const formattedEnd = endDate ? formatDisplayDate(endDate, { includeDayOfWeek: false, includeYear: false }) : '';
+
+  const isWeekly = mode === 'weekly';
+  const isCustom = mode === 'custom';
+
+  // In range mode, if startDate === endDate (or no range set), show "Select Dates" instead of "Nov 11" with "1d"
+  const hasRangeSelected = Boolean(startDate && endDate && (startDate !== endDate || mode === 'weekly'));
 
   // Formatted trigger label
-  const displaySummary = startDate
-    ? mode === 'single'
-      ? formatDisplayDate(startDate, { includeDayOfWeek: true })
-      : formatRangeSummary(startDate, endDate)
+  const displaySummary = mode === 'single'
+    ? (startDate ? formattedStart : placeholder)
+    : hasRangeSelected
+    ? `${formattedStart} – ${formattedEnd}`
     : placeholder;
 
   return (
     <div ref={containerRef} className={`relative inline-block w-full ${className}`}>
       {label && (
-        <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+        <label className="block text-[11px] font-semibold text-muted-foreground mb-1 truncate">
           {label}
         </label>
       )}
 
-      {/* Trigger Button */}
+      {/* Trigger Button with Perfect Alignment & Motion Effects */}
       <button
         type="button"
         disabled={disabled}
@@ -127,47 +138,89 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={`Booking Date Selector: currently ${displaySummary}`}
-        className={`w-full flex items-center justify-between gap-2.5 px-3.5 py-2.5 rounded-xl border border-border/80 bg-background hover:bg-muted/30 text-foreground transition-all shadow-xs focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
-          isOpen ? 'ring-2 ring-primary border-primary' : ''
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${buttonClassName}`}
+        className={`w-full group flex items-center justify-between text-left rounded-xl border transition-all duration-200 cursor-pointer focus:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
+          compact
+            ? 'h-[38px] px-3 py-0 bg-background text-xs font-semibold'
+            : 'min-h-[42px] px-3.5 py-2 bg-background text-xs'
+        } ${
+          isOpen
+            ? 'border-primary ring-2 ring-primary/25 bg-card shadow-sm'
+            : 'border-border/80 hover:border-primary/50 hover:bg-accent/40 shadow-xs hover:shadow-sm'
+        } ${disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''} ${buttonClassName}`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="p-1.5 rounded-lg bg-primary/10 text-primary shrink-0">
-            <CalendarIcon className="h-4 w-4" />
+        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+          <div className={`flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+            compact ? 'h-4 w-4 text-primary' : 'p-1.5 rounded-lg bg-primary/10 text-primary'
+          }`}>
+            <CalendarIcon className={compact ? 'h-3.5 w-3.5' : 'h-4 w-4'} />
           </div>
-          <div className="text-left truncate">
-            <div className="text-xs font-bold text-foreground truncate">{displaySummary}</div>
-            {startDate && mode === 'range' && (
-              <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <span>{daysCount} {daysCount === 1 ? 'day session' : 'days total'}</span>
-                <span>•</span>
-                <span className="text-primary font-medium">Click to adjust</span>
+
+          <div className="min-w-0 flex-1 truncate">
+            {compact ? (
+              <div className="flex items-center gap-1.5 truncate">
+                <span className="font-bold text-foreground text-xs truncate">
+                  {displaySummary}
+                </span>
+                {hasRangeSelected && mode !== 'single' && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md shrink-0 ${
+                    isWeekly
+                      ? 'bg-tan-500/15 text-tan-700 dark:text-tan-300'
+                      : isCustom
+                      ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300'
+                      : 'bg-primary/10 text-primary'
+                  }`}>
+                    {isWeekly ? '7d (Weekly)' : `${daysCount}d`}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="truncate">
+                <div className="text-xs font-bold text-foreground truncate">{displaySummary}</div>
+                {hasRangeSelected && mode !== 'single' && (
+                  <div className="text-[10px] text-muted-foreground flex items-center gap-1 truncate mt-0.5">
+                    {isWeekly ? (
+                      <span className="font-semibold text-primary">7-day pass (fixed range)</span>
+                    ) : isCustom ? (
+                      <span>{daysCount} {daysCount === 1 ? 'day selected' : 'days total (flexible)'}</span>
+                    ) : (
+                      <span>{daysCount} {daysCount === 1 ? 'day pass' : 'days total'}</span>
+                    )}
+                    <span>•</span>
+                    <span className="text-primary font-medium group-hover:underline">Click to change</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          {startDate && mode === 'range' && (
-            <span className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/25">
-              <Sparkles className="h-2.5 w-2.5 text-amber-600 dark:text-amber-400" />
-              {daysCount}d
+        <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+          {!compact && hasRangeSelected && mode !== 'single' && (
+            <span className={`hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+              isWeekly
+                ? 'bg-tan-500/15 text-tan-700 dark:text-tan-300 border-tan-500/30'
+                : isCustom
+                ? 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30'
+                : 'bg-primary/15 text-foreground border-primary/25'
+            }`}>
+              <Sparkles className="h-2.5 w-2.5" />
+              {isWeekly ? 'Weekly Pass' : isCustom ? `${daysCount}d Custom` : `${daysCount}d`}
             </span>
           )}
           <ChevronDown
-            className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-              isOpen ? 'rotate-180 text-primary' : ''
+            className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-250 ease-out ${
+              isOpen ? 'rotate-180 text-primary' : 'group-hover:text-foreground'
             }`}
           />
         </div>
       </button>
 
-      {/* Popover Calendar Modal / Dropdown */}
+      {/* Popover Calendar Modal / Dropdown with Animated Caret & Motion */}
       {isOpen && (
         <>
           {/* Mobile backdrop for small screens */}
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs z-40 sm:hidden"
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs z-40 sm:hidden animate-in fade-in duration-200"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
           />
@@ -177,16 +230,27 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
             aria-modal="true"
             aria-label="Select Date Range"
             className={`z-50 ${
-              // Mobile: centered bottom sheet / modal
-              'fixed sm:absolute inset-x-3 bottom-4 sm:inset-x-auto sm:bottom-auto'
-            } sm:top-full sm:mt-2 ${
+              // Mobile: centered modal dialog
+              'fixed sm:absolute inset-x-3 top-1/2 -translate-y-1/2 sm:inset-x-auto sm:top-full sm:translate-y-0 sm:mt-2.5'
+            } ${
               align === 'right'
-                ? 'sm:right-0'
+                ? 'sm:right-0 sm:origin-top-right'
                 : align === 'center'
-                ? 'sm:left-1/2 sm:-translate-x-1/2'
-                : 'sm:left-0'
-            } w-auto max-w-md sm:w-[380px] md:w-[420px] transition-all animate-in fade-in zoom-in-95 duration-150`}
+                ? 'sm:left-1/2 sm:-translate-x-1/2 sm:origin-top'
+                : 'sm:left-0 sm:origin-top-left'
+            } w-auto max-w-[calc(100vw-24px)] sm:w-[380px] md:w-[410px] calendar-popover-anim`}
           >
+            {/* Top decorative pointer caret on desktop */}
+            <div
+              className={`hidden sm:block absolute -top-2 w-4 h-4 rotate-45 bg-card border-t border-l border-border/80 z-10 ${
+                align === 'right'
+                  ? 'right-6'
+                  : align === 'center'
+                  ? 'left-1/2 -translate-x-1/2'
+                  : 'left-6'
+              }`}
+            />
+
             <DateRangeCalendar
               startDate={startDate}
               endDate={endDate}
@@ -200,7 +264,7 @@ export const DateRangePicker: React.FC<DateRangePickerProps> = ({
               inline={false}
               onCancel={() => setIsOpen(false)}
               onApply={() => setIsOpen(false)}
-              className="border-2 border-primary/20 shadow-2xl"
+              className="border border-border/90 shadow-2xl relative z-20"
             />
           </div>
         </>

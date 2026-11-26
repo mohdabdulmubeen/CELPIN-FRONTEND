@@ -107,33 +107,6 @@ export interface AvailabilityResult {
   dateItems?: DateItem[];
 }
 
-export interface UserProfile {
-  credits: number;
-  hoursBooked: number;
-  totalSaved: number;
-  freeCoffeesReady: number;
-  currentTier: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
-  lifetimePoints: number;
-  nextTierPoints: number;
-}
-
-export interface RewardItem {
-  id: string;
-  name: string;
-  description: string;
-  creditCost: number;
-  icon: string;
-}
-
-export interface ActivityLog {
-  id: string;
-  type: 'earned' | 'redeemed' | 'bonus';
-  title: string;
-  credits: number;
-  description: string;
-  date: string;
-}
-
 export interface JobListing {
   id: string;
   title: string;
@@ -145,4 +118,3 @@ export interface JobListing {
   requirements?: string[];
   postedDate?: string;
 }
-

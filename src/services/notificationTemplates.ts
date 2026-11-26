@@ -65,8 +65,8 @@ export const NOTIFICATION_TEMPLATES: Record<NotificationType, NotificationTempla
     category: 'booking',
     title: 'Refund initiated',
     template: 'Your refund of [Amount] for [Space Name] is on its way. It may take [Processing Time] to appear.',
-    defaultActionLabel: 'View Account',
-    defaultActionTarget: 'rewards',
+    defaultActionLabel: 'View Booking',
+    defaultActionTarget: 'booking',
     defaultParams: {
       'Amount': '₹540',
       'Space Name': 'Celpin Team Studio 3',
@@ -78,8 +78,8 @@ export const NOTIFICATION_TEMPLATES: Record<NotificationType, NotificationTempla
     category: 'booking',
     title: 'Refund completed',
     template: 'Your refund of [Amount] has been processed.',
-    defaultActionLabel: 'View Wallet',
-    defaultActionTarget: 'rewards',
+    defaultActionLabel: 'View Booking',
+    defaultActionTarget: 'booking',
     defaultParams: {
       'Amount': '₹540'
     }
@@ -185,7 +185,7 @@ export const NOTIFICATION_TEMPLATES: Record<NotificationType, NotificationTempla
     title: 'Space unavailable',
     template: '[Space Name] is no longer available for your booking. Choose another space or contact support for help.',
     defaultActionLabel: 'Choose Another Space',
-    defaultActionTarget: 'floor-map',
+    defaultActionTarget: 'booking',
     defaultParams: {
       'Space Name': 'Celpin Conference Hall A'
     }
@@ -243,7 +243,7 @@ export const NOTIFICATION_TEMPLATES: Record<NotificationType, NotificationTempla
     title: 'Booking review request',
     template: 'How was your experience at [Space Name]? Leave a quick review.',
     defaultActionLabel: 'Leave Review',
-    defaultActionTarget: 'rewards',
+    defaultActionTarget: 'booking',
     defaultParams: {
       'Space Name': 'Celpin Quiet Pod #2'
     }
@@ -310,4 +310,3 @@ export const NOTIFICATION_CATEGORIES: {
   { id: 'support', label: 'Support & Changes' },
   { id: 'optional', label: 'Optional' }
 ];
-

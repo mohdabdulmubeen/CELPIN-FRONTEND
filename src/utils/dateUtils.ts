@@ -1,5 +1,5 @@
 /**
- * Date Utility Functions for Celpin Smart Co-Working Café
+ * Date Utility Functions for Celpin Smart Co-Working Cafe
  * Zero-dependency, timezone-safe date helpers for booking ranges and calendars.
  */
 
@@ -323,3 +323,105 @@ export const DATE_PRESETS: DatePreset[] = [
     })
   }
 ];
+
+export interface BookingTimeSlot {
+  startTime: string; // "09:00"
+  endTime: string;   // "11:00"
+  startHour: number; // 9
+  endHour: number;   // 11
+  label: string;     // "9:00 AM – 11:00 AM"
+  shortLabel: string;// "9:00–11:00"
+}
+
+export function formatHourLabel(hour: number): string {
+  const h = Math.floor(hour) % 24;
+  if (h === 0) return '12:00 AM';
+  if (h < 12) return `${h}:00 AM`;
+  if (h === 12) return '12:00 PM';
+  return `${h - 12}:00 PM`;
+}
+
+export function formatShortHourLabel(hour: number): string {
+  const h = Math.floor(hour) % 24;
+  if (h === 0) return '12:00';
+  if (h <= 12) return `${h}:00`;
+  return `${h - 12}:00`;
+}
+
+export function parseStartHour(timeStr?: string): number {
+  if (!timeStr) return 9;
+  const parts = timeStr.split(':');
+  const h = parseInt(parts[0], 10);
+  return isNaN(h) ? 9 : h;
+}
+
+export function parseCafeHours(timingStr?: string): { startHour: number; endHour: number } {
+  let startHour = 9; // Default workspace check-in start 9:00 AM
+  let endHour = 21;  // Default workspace closing 9:00 PM (21:00)
+
+  if (timingStr) {
+    const parts = timingStr.split(/[–-]/);
+    if (parts.length === 2) {
+      const closeMatch = parts[1].trim().match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+      if (closeMatch) {
+        let h = parseInt(closeMatch[1], 10);
+        const isPM = closeMatch[3].toUpperCase() === 'PM';
+        if (isPM && h < 12) h += 12;
+        if (!isPM && h === 12) h = 0;
+        endHour = Math.max(startHour + 1, h);
+      }
+    }
+  }
+
+  return { startHour, endHour };
+}
+
+/**
+ * Returns consecutive duration time slots fitting strictly within booking hours.
+ * For example:
+ * - 2h duration: 9:00–11:00, 11:00–1:00, 1:00–3:00, 3:00–5:00, 5:00–7:00, 7:00–9:00
+ * - 3h duration: 9:00–12:00, 12:00–3:00, 3:00–6:00, 6:00–9:00
+ * - Only slots that fit within available booking hours are returned.
+ */
+export function getConsecutiveTimeSlots(
+  durationHours: number = 2,
+  timingStr?: string
+): BookingTimeSlot[] {
+  const validDuration = Math.max(1, Math.min(8, Math.floor(durationHours)));
+  const { startHour, endHour } = parseCafeHours(timingStr);
+
+  const slots: BookingTimeSlot[] = [];
+  let curr = startHour;
+
+  while (curr + validDuration <= endHour) {
+    const end = curr + validDuration;
+    const startStr = `${String(curr).padStart(2, '0')}:00`;
+    const endStr = `${String(end).padStart(2, '0')}:00`;
+
+    slots.push({
+      startTime: startStr,
+      endTime: endStr,
+      startHour: curr,
+      endHour: end,
+      label: `${formatHourLabel(curr)} – ${formatHourLabel(end)}`,
+      shortLabel: `${formatShortHourLabel(curr)}–${formatShortHourLabel(end)}`
+    });
+
+    curr += validDuration;
+  }
+
+  return slots;
+}
+
+/**
+ * Formats a start time and duration into a start-end slot label, e.g. "9:00 AM – 11:00 AM"
+ */
+export function formatTimeSlotRange(
+  startTime?: string,
+  durationHours: number = 2
+): string {
+  const startH = parseStartHour(startTime);
+  const dur = Math.max(1, Math.min(8, Math.floor(durationHours || 2)));
+  const endH = startH + dur;
+  return `${formatHourLabel(startH)} – ${formatHourLabel(endH)}`;
+}

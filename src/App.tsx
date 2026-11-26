@@ -7,9 +7,6 @@ import { ListYourSpaceModal } from './components/ListYourSpaceModal';
 import { NotificationProvider } from './context/NotificationContext';
 import { HomePage } from './pages/HomePage';
 import { BookingPage } from './pages/BookingPage';
-import { FloorMapPage } from './pages/FloorMapPage';
-import { CafePage } from './pages/CafePage';
-import { RewardsPage } from './pages/RewardsPage';
 import { ProposalPage } from './pages/ProposalPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminPage } from './pages/AdminPage';
@@ -31,7 +28,7 @@ export function App() {
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-amber-600 selection:text-white">
+      <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-tan-500 selection:text-white">
         {/* Celpin Official Navbar */}
         <CelpinNavbar
           currentPage={currentPage}
@@ -68,9 +65,6 @@ export function App() {
               initialCustomerEmail={params.customerEmail}
             />
           )}
-          {currentPage === 'floor-map' && <FloorMapPage onNavigate={handleNavigate} />}
-          {currentPage === 'cafe' && <CafePage onNavigate={handleNavigate} />}
-          {currentPage === 'rewards' && <RewardsPage onNavigate={handleNavigate} />}
           {currentPage === 'proposal' && <ProposalPage />}
           {currentPage === 'register' && (
             <RegisterPage
@@ -91,6 +85,7 @@ export function App() {
 
         {/* Celpin Official Footer */}
         <CelpinFooter onNavigate={handleNavigate} />
+
       </div>
     </NotificationProvider>
   );
