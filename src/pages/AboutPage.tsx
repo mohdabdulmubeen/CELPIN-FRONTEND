@@ -13,7 +13,8 @@ import {
   Clock,
   HeartHandshake,
   Layers,
-  MapPin
+  MapPin,
+  Mail
 } from 'lucide-react';
 
 interface AboutPageProps {
@@ -219,6 +220,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <span>Partner with Celpin</span>
               </button>
             )}
+          </div>
+          <div className="mt-8 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <Mail className="h-4 w-4 text-primary" aria-hidden="true" />
+            <span>Questions or inquiries? Reach us at</span>
+            <a
+              href="https://mail.google.com/mail/?view=cm&fs=1&to=contact@celpin.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-primary hover:underline"
+            >
+              contact@celpin.in
+            </a>
           </div>
         </div>
       </section>

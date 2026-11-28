@@ -1,5 +1,5 @@
-import React from 'react';
-import { Instagram, Twitter, Linkedin, Mail } from 'lucide-react';
+import React, { useState } from 'react';
+import { ContactMailModal } from './ContactMailModal';
 
 interface FooterProps {
   onNavigate: (page: string, params?: any) => void;
@@ -32,7 +32,57 @@ const AppleLogo: React.FC<{ className?: string }> = ({ className = 'h-5 w-5' }) 
   </svg>
 );
 
+const InstagramLogo: React.FC<{ className?: string }> = ({ className = 'h-full w-full' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <defs>
+      <radialGradient id="celpin-ig-grad" cx="30%" cy="107%" r="150%">
+        <stop offset="0%" stopColor="#fdf497" />
+        <stop offset="5%" stopColor="#fdf497" />
+        <stop offset="45%" stopColor="#fd5949" />
+        <stop offset="60%" stopColor="#d6249f" />
+        <stop offset="90%" stopColor="#285AEB" />
+      </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="24" height="24" fill="url(#celpin-ig-grad)" />
+    <rect x="4.5" y="4.5" width="15" height="15" rx="4.2" stroke="#ffffff" strokeWidth="1.8" />
+    <circle cx="12" cy="12" r="3.6" stroke="#ffffff" strokeWidth="1.8" />
+    <circle cx="16.5" cy="7.5" r="1.15" fill="#ffffff" />
+  </svg>
+);
+
+const XLogo: React.FC<{ className?: string }> = ({ className = 'h-full w-full' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="0" y="0" width="24" height="24" fill="#000000" />
+    <path
+      d="M16.99 5.5h2.48l-5.42 6.2 6.38 8.43h-5l-3.91-5.11-4.47 5.11H4.57l5.8-6.63L4.25 5.5h5.12l3.54 4.68zm-.87 13.15h1.37L8.62 6.91H7.14z"
+      fill="#ffffff"
+    />
+  </svg>
+);
+
+const LinkedInLogo: React.FC<{ className?: string }> = ({ className = 'h-full w-full' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="0" y="0" width="24" height="24" fill="#0A66C2" />
+    <path
+      d="M8 19H5V9h3v10zM6.5 7.732A1.75 1.75 0 116.5 4.23a1.75 1.75 0 010 3.502zM20 19h-3v-5.604c0-3.368-4-3.113-4 0V19h-3V9h3v1.765C14.396 8.179 20 7.988 20 13.241V19z"
+      fill="#ffffff"
+    />
+  </svg>
+);
+
+const GmailLogo: React.FC<{ className?: string }> = ({ className = 'h-full w-full' }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="0" y="0" width="24" height="24" fill="#ffffff" />
+    <path d="M1.5 6.5V18a1.5 1.5 0 001.5 1.5h3V10.8L12 15.3l6-4.5v8.7h3a1.5 1.5 0 001.5-1.5V6.5a2 2 0 00-3.2-1.6L12 10.3 4.7 4.9A2 2 0 001.5 6.5z" fill="#EA4335" />
+    <path d="M1.5 6.5V18A1.5 1.5 0 003 19.5h3V10.8L1.5 7.5V6.5z" fill="#4285F4" />
+    <path d="M22.5 6.5V18a1.5 1.5 0 01-1.5 1.5h-3V10.8l4.5-3.3V6.5z" fill="#34A853" />
+    <path d="M18 10.8l4.5-3.3V6.5a2 2 0 00-3.2-1.6L18 5.9v4.9z" fill="#FBBC05" />
+  </svg>
+);
+
 export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
+  const [isMailModalOpen, setIsMailModalOpen] = useState(false);
+
   return (
     <footer className="border-t border-border">
       {/* Single Line: Keep in touch & Download Celpin App */}
@@ -44,39 +94,40 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
               <span className="text-sm font-semibold text-foreground">Keep in touch</span>
               <div className="flex items-center gap-2">
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/celpin.official/"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   aria-label="Instagram"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:scale-105 transition-all"
                 >
-                  <Instagram className="h-4 w-4" />
+                  <InstagramLogo className="h-full w-full" />
                 </a>
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/Celpin_Official"
                   target="_blank"
-                  rel="noreferrer"
-                  aria-label="Twitter"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                  rel="noopener noreferrer"
+                  aria-label="X (Twitter)"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:scale-105 transition-all"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <XLogo className="h-full w-full" />
                 </a>
                 <a
                   href="https://linkedin.com"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   aria-label="LinkedIn"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:scale-105 transition-all"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <LinkedInLogo className="h-full w-full" />
                 </a>
-                <a
-                  href="mailto:support@celpin.cafe"
-                  aria-label="Email"
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setIsMailModalOpen(true)}
+                  aria-label="Email via Gmail"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden border border-border hover:border-primary/50 hover:scale-105 transition-all cursor-pointer"
                 >
-                  <Mail className="h-4 w-4" />
-                </a>
+                  <GmailLogo className="h-full w-full" />
+                </button>
               </div>
             </div>
 
@@ -186,6 +237,11 @@ export const CelpinFooter: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
       </div>
+
+      <ContactMailModal
+        isOpen={isMailModalOpen}
+        onClose={() => setIsMailModalOpen(false)}
+      />
     </footer>
   );
 };
